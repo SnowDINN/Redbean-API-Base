@@ -1,0 +1,17 @@
+@localhost = https://localhost:44395
+
+###
+< {%
+    request.variables.set("id", "")
+%}
+GET {{localhost}}/Auth/Login?id={{id}}
+Content-Type: application/json
+Accept: application/json
+
+###
+< {%
+    request.variables.set("id", "")
+%}
+GET {{localhost}}/Auth/Register?id={{id}}
+Content-Type: application/json
+Accept: application/json
