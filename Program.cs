@@ -1,4 +1,4 @@
-using BoongGod.Controllers;
+using BoongGod.Api.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,16 +1,16 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace BoongGod.Controllers;
+namespace BoongGod.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
 public class AuthenticationController : ControllerBase
 {
 	[HttpGet("[action]")]
-	public async Task<string> Register(string id)
+	public async Task<string> Register(string id = "Guest")
 	{
-		await Task.CompletedTask;
-		return id;
+		await Task.Delay(TimeSpan.FromSeconds(2.5f));
+		return ResponseConvert.ToResult($"{id} register the boongGod");
 	}
 }
 
@@ -22,7 +22,11 @@ public abstract class AuthenticationApi
 	{
 		app.MapGet($"{Controller}/Login", (string id) =>
 			{
-				return id;
+				
+				if (int.TryParse(id, out var integer))
+					return ResponseConvert.ToResult($"not support number", 1);
+
+				return ResponseConvert.ToResult($"{id} login the boongGod");
 			})
 			.WithTags(Controller)
 			.WithOpenApi();
