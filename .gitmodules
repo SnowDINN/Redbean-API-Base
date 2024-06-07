@@ -1,0 +1,3 @@
+[submodule "ApiBridge"]
+	path = ApiBridge
+	url = https://github.com/SnowDINN/BoongGod-Module.git
