@@ -1,4 +1,3 @@
-using Redbean.Api.Controllers;
 using Redbean.Firebase;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,7 +17,4 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.MapControllers();
-
-AuthenticationApi.Setup(app);
-
 app.Run();
