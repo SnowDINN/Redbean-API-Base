@@ -8,22 +8,22 @@ namespace Redbean.Api.Controllers;
 public class StorageController : ControllerBase
 {
 	[HttpGet]
-	public Task<string> GetTables(string version) => GetFiles($"Table/{version}/");
+	public Task<string> GetTableFiles(string version) => GetFiles($"Table/{version}/");
 	
 	[HttpGet]
-	public Task<string> GetAndroidBundles(string version) => GetFiles($"Bundle/{version}/Android/");
+	public Task<string> GetAndroidBundleFiles(string version) => GetFiles($"Bundle/{version}/Android/");
 	
 	[HttpGet]
-	public Task<string> GetiOSBundles(string version) => GetFiles($"Bundle/{version}/iOS/");
+	public Task<string> GetiOSBundleFiles(string version) => GetFiles($"Bundle/{version}/iOS/");
 
 	[HttpDelete]
-	public async Task<string> DeleteTables(string version) => await DeleteFiles($"Table/{version}/");
+	public async Task<string> DeleteTableFiles(string version) => await DeleteFiles($"Table/{version}/");
 	
 	[HttpDelete]
-	public async Task<string> DeleteAndroidBundles(string version) => await DeleteFiles($"Bundle/{version}/iOS/");
+	public async Task<string> DeleteAndroidBundleFiles(string version) => await DeleteFiles($"Bundle/{version}/Android/");
 	
 	[HttpDelete]
-	public async Task<string> DeleteiOSBundles(string version) => await DeleteFiles($"Bundle/{version}/iOS/");
+	public async Task<string> DeleteiOSBundleFiles(string version) => await DeleteFiles($"Bundle/{version}/iOS/");
 
 	private Task<string> GetFiles(string path)
 	{
