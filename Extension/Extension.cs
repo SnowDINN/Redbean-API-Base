@@ -24,16 +24,16 @@ public static class Extension
 
 	private static object JTokenToObject(JToken? token)
 	{
-		switch (token!.Type)
+		switch (token.Type)
 		{
 			case JTokenType.Object:
 				return JObjectToDictionary(token as JObject);
         
 			case JTokenType.Array:
-				return (from item in (JArray)token select JTokenToObject(item)).ToList();
+				return (from item in token as JArray select JTokenToObject(item)).ToList();
         
 			default:
-				return (token as JValue)?.Value!;
+				return (token as JValue).Value;
 		}
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Redbean.Firebase;
+using Object = Google.Apis.Storage.v1.Data.Object;
 
 namespace Redbean.Api.Controllers;
 
@@ -15,6 +16,15 @@ public class StorageController : ControllerBase
 	
 	[HttpGet]
 	public Task<string> GetiOSBundleFiles(string version) => GetFiles($"Bundle/{version}/iOS/");
+	
+	[HttpPost]
+	public Task<string> PostTableFiles(string version, IFormFile[] files) => PostFiles($"Table/{version}/", files);
+
+	[HttpPost]
+	public Task<string> PostAndroidBundleFiles(string version, IFormFile[] files) => PostFiles($"Bundle/{version}/Android/", files);
+
+	[HttpPost]
+	public Task<string> PostiOSBundleFiles(string version, IFormFile[] files) => PostFiles($"Bundle/{version}/iOS/", files);
 
 	[HttpDelete]
 	public async Task<string> DeleteTableFiles(string version) => await DeleteFiles($"Table/{version}/");
@@ -35,6 +45,28 @@ public class StorageController : ControllerBase
 			completionSource.SetResult(objectList.ToJson());
 
 		return completionSource.Task;
+	}
+
+	private async Task<string> PostFiles(string path, IEnumerable<IFormFile> files)
+	{
+		var fileList = new List<string>();
+		
+		foreach (var file in files)
+		{
+			var obj = new Object
+			{
+				Bucket = FirebaseSetting.StorageBucket,
+				Name = $"{path}{file.FileName}",
+				ContentType = file.ContentType,
+				CacheControl = "no-store",
+			};
+
+			await FirebaseSetting.Storage?.UploadObjectAsync(obj, file.OpenReadStream());
+			
+			fileList.Add(file.FileName);
+		}
+		
+		return fileList.ToJson();
 	}
 	
 	private async Task<string> DeleteFiles(string path)
