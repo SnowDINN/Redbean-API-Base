@@ -14,7 +14,7 @@ public class FirebaseBootstrap
 		using var reader = new StreamReader(environmentPath);
 		var json = JObject.Parse(await reader.ReadToEndAsync());
 
-		FirebaseSetting.Id = json["project_id"].Value<string>();
+		FirebaseSetting.Id = json["project_id"]?.Value<string>();
 		FirebaseSetting.StorageBucket = $"{FirebaseSetting.Id}.appspot.com";
 		
 		FirebaseSetting.Firestore = await FirestoreDb.CreateAsync(FirebaseSetting.Id);

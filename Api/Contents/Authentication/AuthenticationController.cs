@@ -10,14 +10,11 @@ public class AuthenticationController : ControllerBase
 	[HttpGet("[action]")]
 	public async Task<string> GetUser(string uid)
 	{
-		var document = FirebaseSetting.Firestore.Collection("users").Document(uid);
-		var snapshot = await document.GetSnapshotAsync();
+		var document = FirebaseSetting.Firestore?.Collection("users").Document(uid)!;
+		var snapshot = await document.GetSnapshotAsync()!;
 		if (snapshot.Exists)
-		{
-			var user = snapshot.ConvertTo<Dictionary<string, object>>();
-			return ResponseConvert.ToJson(user);
-		}
+			return snapshot.ToDictionary().ToJson();
 
-		return ResponseConvert.ToJson("User not found", 1);
+		return "User not found".ToJson(1);
 	}
 }

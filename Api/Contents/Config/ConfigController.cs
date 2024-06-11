@@ -28,21 +28,18 @@ public class ConfigController : ControllerBase
 
 	private async Task<string> GetConfig(string path)
 	{
-		var document = FirebaseSetting.Firestore.Collection("config").Document(path);
-		var snapshot = await document.GetSnapshotAsync();
+		var document = FirebaseSetting.Firestore?.Collection("config").Document(path)!;
+		var snapshot = await document.GetSnapshotAsync()!;
 		if (snapshot.Exists)
-		{
-			var config = snapshot.ConvertTo<Dictionary<string, object>>();
-			return ResponseConvert.ToJson(config);
-		}
+			return snapshot.ToDictionary().ToJson();
 
-		return ResponseConvert.ToJson("Config not found", 1);
+		return "Config not found".ToJson(1);
 	}
 	
 	private async Task<string> PostVersion(PlatformType type, string version)
 	{
-		var document = FirebaseSetting.Firestore.Collection("config").Document("app");
-		var snapshot = await document.GetSnapshotAsync();
+		var document = FirebaseSetting.Firestore?.Collection("config").Document("app")!;
+		var snapshot = await document.GetSnapshotAsync()!;
 		if (snapshot.Exists)
 		{
 			var config = snapshot.ToConvert<AppConfigResponse>();
@@ -51,25 +48,25 @@ public class ConfigController : ControllerBase
 			switch (type)
 			{
 				case PlatformType.Android:
-					response.BeforeVersion = config.Android.Version;
+					response.BeforeVersion = config?.Android.Version!;
 					response.AfterVersion = version;
-					
-					config.Android.Version = version;
+					if (config != null)
+						config.Android.Version = version;
 					break;
 				
 				case PlatformType.iOS:
-					response.BeforeVersion = config.iOS.Version;
+					response.BeforeVersion = config?.iOS.Version!;
 					response.AfterVersion = version;
-					
-					config.iOS.Version = version;
+					if (config != null)
+						config.iOS.Version = version;
 					break;
 			}
 			
 			await document.SetAsync(config.ToDocument());
 			
-			return ResponseConvert.ToJson(response);
+			return response.ToJson();
 		}
 
-		return ResponseConvert.ToJson("Config not found", 1);
+		return "Config not found".ToJson(1);
 	}
 }

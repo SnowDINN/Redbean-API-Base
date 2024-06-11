@@ -27,22 +27,23 @@ public class StorageController : ControllerBase
 
 	private Task<string> GetFiles(string path)
 	{
-		var taskCompletionSource = new TaskCompletionSource<string>();
+		var completionSource = new TaskCompletionSource<string>();
 		
-		var objects = FirebaseSetting.Storage.ListObjects(FirebaseSetting.StorageBucket, path);
-		var list = objects.Select(obj => obj.Name).ToList();
-		
-		taskCompletionSource.SetResult(ResponseConvert.ToJson(list));
-		return taskCompletionSource.Task;
+		var objects = FirebaseSetting.Storage?.ListObjects(FirebaseSetting.StorageBucket, path)!;
+		var objectList = objects?.Select(obj => obj.Name).ToList()!;
+		if (objectList != null)
+			completionSource.SetResult(objectList.ToJson());
+
+		return completionSource.Task;
 	}
 	
 	private async Task<string> DeleteFiles(string path)
 	{
-		var objects = FirebaseSetting.Storage.ListObjects(FirebaseSetting.StorageBucket, path);
-		var list = objects.Select(obj => obj.Name).ToList();
-		foreach (var obj in list)
-			await FirebaseSetting.Storage.DeleteObjectAsync($"{FirebaseSetting.Id}.appspot.com", obj);
+		var objects = FirebaseSetting.Storage?.ListObjects(FirebaseSetting.StorageBucket, path)!;
+		var objectList = objects?.Select(obj => obj.Name).ToList()!;
+		foreach (var obj in objectList)
+			await FirebaseSetting.Storage?.DeleteObjectAsync($"{FirebaseSetting.Id}.appspot.com", obj)!;
 		
-		return ResponseConvert.ToJson(list);
+		return objectList.ToJson();
 	}
 }
