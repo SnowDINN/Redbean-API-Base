@@ -18,22 +18,22 @@ public class StorageController : ControllerBase
 	public Task<string> GetiOSBundleFiles(string version) => GetFiles($"Bundle/{version}/iOS/");
 	
 	[HttpPost]
-	public Task<string> PostTableFiles(string version, IFormFile[] files) => PostFiles($"Table/{version}/", files);
+	public Task<string> PostTableFile(string version, IFormFile[] tables) => PostFiles($"Table/{version}/", tables);
 
 	[HttpPost]
-	public Task<string> PostAndroidBundleFiles(string version, IFormFile[] files) => PostFiles($"Bundle/{version}/Android/", files);
+	public Task<string> PostAndroidBundleFile(string version, IFormFile[] bundles) => PostFiles($"Bundle/{version}/Android/", bundles);
 
 	[HttpPost]
-	public Task<string> PostiOSBundleFiles(string version, IFormFile[] files) => PostFiles($"Bundle/{version}/iOS/", files);
+	public Task<string> PostiOSBundleFile(string version, IFormFile[] bundles) => PostFiles($"Bundle/{version}/iOS/", bundles);
 
 	[HttpDelete]
-	public async Task<string> DeleteTableFiles(string version) => await DeleteFiles($"Table/{version}/");
+	public async Task<string> DeleteTableFile(string version) => await DeleteFiles($"Table/{version}/");
 	
 	[HttpDelete]
-	public async Task<string> DeleteAndroidBundleFiles(string version) => await DeleteFiles($"Bundle/{version}/Android/");
+	public async Task<string> DeleteAndroidBundleFile(string version) => await DeleteFiles($"Bundle/{version}/Android/");
 	
 	[HttpDelete]
-	public async Task<string> DeleteiOSBundleFiles(string version) => await DeleteFiles($"Bundle/{version}/iOS/");
+	public async Task<string> DeleteiOSBundleFile(string version) => await DeleteFiles($"Bundle/{version}/iOS/");
 
 	private Task<string> GetFiles(string path)
 	{
@@ -49,24 +49,21 @@ public class StorageController : ControllerBase
 
 	private async Task<string> PostFiles(string path, IEnumerable<IFormFile> files)
 	{
-		var fileList = new List<string>();
-		
+		await DeleteFiles(path);
+
 		foreach (var file in files)
 		{
 			var obj = new Object
 			{
 				Bucket = FirebaseSetting.StorageBucket,
 				Name = $"{path}{file.FileName}",
-				ContentType = file.ContentType,
 				CacheControl = "no-store",
 			};
 
-			await FirebaseSetting.Storage?.UploadObjectAsync(obj, file.OpenReadStream());
-			
-			fileList.Add(file.FileName);
+			await FirebaseSetting.Storage?.UploadObjectAsync(obj, file.OpenReadStream());	
 		}
 		
-		return fileList.ToJson();
+		return files.Select(_ => _.FileName).ToList().ToJson();
 	}
 	
 	private async Task<string> DeleteFiles(string path)
