@@ -13,7 +13,7 @@ public class AuthenticationController : ControllerBase
 	public async Task<string> GetUser(string uid)
 	{
 		var equalTo = FirebaseSetting.Firestore?.Collection("users").WhereEqualTo("social.id", uid);
-		var querySnapshot = await equalTo.GetSnapshotAsync();
+		var querySnapshot = await equalTo?.GetSnapshotAsync()!;
 		if (querySnapshot.Count != 0)
 			return querySnapshot.Documents.First().ToDictionary().ToJson();
 		
@@ -32,7 +32,7 @@ public class AuthenticationController : ControllerBase
 		};
 		
 		var document = FirebaseSetting.Firestore?.Collection("users").Document(uid);
-		await document.SetAsync(user.ToDocument());
+		await document?.SetAsync(user.ToDocument())!;
 		
 		return user.ToJson();
 	}

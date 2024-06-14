@@ -62,7 +62,7 @@ public class StorageController : ControllerBase
 				CacheControl = "no-store",
 			};
 
-			await FirebaseSetting.Storage?.UploadObjectAsync(obj, file.OpenReadStream());	
+			await FirebaseSetting.Storage?.UploadObjectAsync(obj, file.OpenReadStream())!;	
 		}
 		
 		return files.Select(_ => _.FileName).ToList().ToJson();
