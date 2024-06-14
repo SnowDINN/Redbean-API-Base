@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Text;
+using Microsoft.AspNetCore.Mvc;
 using Redbean.Firebase;
 using Object = Google.Apis.Storage.v1.Data.Object;
 
@@ -9,32 +10,33 @@ namespace Redbean.Api.Controllers;
 public class StorageController : ControllerBase
 {
 	[HttpGet]
-	public Task<string> GetTableFiles(string version) => GetFiles($"Table/{version}/");
-	
-	[HttpGet]
-	public Task<string> GetAndroidBundleFiles(string version) => GetFiles($"Bundle/{version}/Android/");
-	
-	[HttpGet]
-	public Task<string> GetiOSBundleFiles(string version) => GetFiles($"Bundle/{version}/iOS/");
+	public Task<string> GetTable(string version) => GetTableAsync($"Table/{version}/");
 	
 	[HttpPost]
-	public Task<string> PostTableFile(string version, IFormFile[] tables) => PostFiles($"Table/{version}/", tables);
+	public Task<string> PostTableFiles(string version, IFormFile[] tables) => PostFilesAsync($"Table/{version}/", tables);
 
 	[HttpPost]
-	public Task<string> PostAndroidBundleFile(string version, IFormFile[] bundles) => PostFiles($"Bundle/{version}/Android/", bundles);
+	public Task<string> PostBundleFiles(string version, int type, IFormFile[] bundles) => PostFilesAsync($"Bundle/{version}/{(MobileType)type}/", bundles);
 
-	[HttpPost]
-	public Task<string> PostiOSBundleFile(string version, IFormFile[] bundles) => PostFiles($"Bundle/{version}/iOS/", bundles);
+	private async Task<string> GetTableAsync(string path)
+	{
+		var dictionary = new Dictionary<string, object>();
+		
+		var objects = FirebaseSetting.Storage?.ListObjects(FirebaseSetting.StorageBucket, path)!;
+		foreach (var obj in objects)
+		{
+			using var memoryStream = new MemoryStream();
+			var table = await FirebaseSetting.Storage?.DownloadObjectAsync(obj, memoryStream)!;
 
-	[HttpDelete]
-	public async Task<string> DeleteTableFile(string version) => await DeleteFiles($"Table/{version}/");
+			var fileName = table.Name.Split('/').Last();
+			var tableName = fileName.Split('.').First();
+			
+			dictionary.Add(tableName, Encoding.UTF8.GetString(memoryStream.ToArray()));
+		}
+
+		return dictionary.ToJson();
+	}
 	
-	[HttpDelete]
-	public async Task<string> DeleteAndroidBundleFile(string version) => await DeleteFiles($"Bundle/{version}/Android/");
-	
-	[HttpDelete]
-	public async Task<string> DeleteiOSBundleFile(string version) => await DeleteFiles($"Bundle/{version}/iOS/");
-
 	private Task<string> GetFiles(string path)
 	{
 		var completionSource = new TaskCompletionSource<string>();
@@ -47,7 +49,7 @@ public class StorageController : ControllerBase
 		return completionSource.Task;
 	}
 
-	private async Task<string> PostFiles(string path, IEnumerable<IFormFile> files)
+	private async Task<string> PostFilesAsync(string path, IEnumerable<IFormFile> files)
 	{
 		await DeleteFiles(path);
 

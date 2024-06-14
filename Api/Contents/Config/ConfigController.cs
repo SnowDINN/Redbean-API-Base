@@ -4,27 +4,18 @@ using Redbean.Firebase;
 
 namespace Redbean.Api.Controllers;
 
-public enum PlatformType
-{
-	Android,
-	iOS
-}
-
 [ApiController]
 [Route("[controller]/[action]")]
 public class ConfigController : ControllerBase
 {
 	[HttpGet]
-	public async Task<string> GetApplicationConfig() => await GetConfig("app");
+	public async Task<string> GetAppConfig() => await GetConfig("app");
 	
 	[HttpGet]
 	public async Task<string> GetTableConfig() => await GetConfig("table");
 	
 	[HttpPost]
-	public async Task<string> PostAndroidVersion(string version) => await PostVersion(PlatformType.Android, version);
-	
-	[HttpPost]
-	public async Task<string> PostiOSVersion(string version) => await PostVersion(PlatformType.iOS, version);
+	public async Task<string> PostAppVersion(string version, int type) => await PostVersion((MobileType)type, version);
 
 	private async Task<string> GetConfig(string path)
 	{
@@ -36,7 +27,7 @@ public class ConfigController : ControllerBase
 		return "Config not found".ToJson(1);
 	}
 	
-	private async Task<string> PostVersion(PlatformType type, string version)
+	private async Task<string> PostVersion(MobileType type, string version)
 	{
 		var document = FirebaseSetting.Firestore?.Collection("config").Document("app")!;
 		var snapshot = await document.GetSnapshotAsync()!;
@@ -47,14 +38,14 @@ public class ConfigController : ControllerBase
 			
 			switch (type)
 			{
-				case PlatformType.Android:
+				case MobileType.Android:
 					response.BeforeVersion = config?.Android.Version!;
 					response.AfterVersion = version;
 					if (config != null)
 						config.Android.Version = version;
 					break;
 				
-				case PlatformType.iOS:
+				case MobileType.iOS:
 					response.BeforeVersion = config?.iOS.Version!;
 					response.AfterVersion = version;
 					if (config != null)
