@@ -1,4 +1,6 @@
-﻿using Google.Cloud.Firestore;
+﻿using FirebaseAdmin;
+using FirebaseAdmin.Auth;
+using Google.Cloud.Firestore;
 using Google.Cloud.Storage.V1;
 using Newtonsoft.Json.Linq;
 
@@ -19,6 +21,8 @@ public class FirebaseBootstrap
 		
 		FirebaseSetting.Firestore = await FirestoreDb.CreateAsync(FirebaseSetting.Id);
 		FirebaseSetting.Storage = await StorageClient.CreateAsync();
+		
+		FirebaseApp.Create();
 	}
 }
 

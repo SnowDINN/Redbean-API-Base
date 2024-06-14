@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FirebaseAdmin.Auth;
+using Microsoft.AspNetCore.Mvc;
+using Redbean.Extension;
 using Redbean.Firebase;
 
 namespace Redbean.Api.Controllers;
@@ -10,11 +12,28 @@ public class AuthenticationController : ControllerBase
 	[HttpGet("[action]")]
 	public async Task<string> GetUser(string uid)
 	{
-		var document = FirebaseSetting.Firestore?.Collection("users").Document(uid)!;
-		var snapshot = await document.GetSnapshotAsync()!;
-		if (snapshot.Exists)
-			return snapshot.ToDictionary().ToJson();
-
-		return "User not found".ToJson(1);
+		var equalTo = FirebaseSetting.Firestore?.Collection("users").WhereEqualTo("social.id", uid);
+		var querySnapshot = await equalTo.GetSnapshotAsync();
+		if (querySnapshot.Count != 0)
+			return querySnapshot.Documents.First().ToDictionary().ToJson();
+		
+		var userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
+		var user = new UserResponse
+		{
+			Social =
+			{
+				Id = userRecord.Uid,
+				Platform = userRecord.ProviderData.First().ProviderId
+			},
+			Information =
+			{
+				Nickname = userRecord.ProviderData.First().DisplayName
+			}
+		};
+		
+		var document = FirebaseSetting.Firestore?.Collection("users").Document(uid);
+		await document.SetAsync(user.ToDocument());
+		
+		return user.ToJson();
 	}
 }
