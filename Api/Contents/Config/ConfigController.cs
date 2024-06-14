@@ -9,15 +9,15 @@ namespace Redbean.Api.Controllers;
 public class ConfigController : ControllerBase
 {
 	[HttpGet]
-	public async Task<string> GetAppConfig() => await GetConfig("app");
+	public async Task<string> GetAppConfig() => await GetConfigAsync("app");
 	
 	[HttpGet]
-	public async Task<string> GetTableConfig() => await GetConfig("table");
+	public async Task<string> GetTableConfig() => await GetConfigAsync("table");
 	
 	[HttpPost]
-	public async Task<string> PostAppVersion(string version, int type) => await PostVersion((MobileType)type, version);
+	public async Task<string> PostAppVersion(string version, int type) => await PostVersionAsync((MobileType)type, version);
 
-	private async Task<string> GetConfig(string path)
+	private async Task<string> GetConfigAsync(string path)
 	{
 		var document = FirebaseSetting.Firestore?.Collection("config").Document(path)!;
 		var snapshot = await document.GetSnapshotAsync()!;
@@ -27,7 +27,7 @@ public class ConfigController : ControllerBase
 		return "Config not found".ToJson(1);
 	}
 	
-	private async Task<string> PostVersion(MobileType type, string version)
+	private async Task<string> PostVersionAsync(MobileType type, string version)
 	{
 		var document = FirebaseSetting.Firestore?.Collection("config").Document("app")!;
 		var snapshot = await document.GetSnapshotAsync()!;

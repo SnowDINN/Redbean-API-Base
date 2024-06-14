@@ -6,10 +6,10 @@ using Redbean.Firebase;
 namespace Redbean.Api.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("[controller]/[action]")]
 public class AuthenticationController : ControllerBase
 {
-	[HttpGet("[action]")]
+	[HttpGet]
 	public async Task<string> GetUser(string uid)
 	{
 		var equalTo = FirebaseSetting.Firestore?.Collection("users").WhereEqualTo("social.id", uid);
