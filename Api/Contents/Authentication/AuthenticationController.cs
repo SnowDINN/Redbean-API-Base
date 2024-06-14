@@ -10,12 +10,12 @@ namespace Redbean.Api.Controllers;
 public class AuthenticationController : ControllerBase
 {
 	[HttpGet]
-	public async Task<string> GetUser(string uid)
+	public async Task<Response> GetUser(string uid)
 	{
 		var equalTo = FirebaseSetting.Firestore?.Collection("users").WhereEqualTo("social.id", uid);
 		var querySnapshot = await equalTo?.GetSnapshotAsync()!;
 		if (querySnapshot.Count != 0)
-			return querySnapshot.Documents.First().ToDictionary().ToJson();
+			return querySnapshot.Documents.First().ToDictionary().ToResponse();
 		
 		var userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
 		var user = new UserResponse
@@ -34,6 +34,6 @@ public class AuthenticationController : ControllerBase
 		var document = FirebaseSetting.Firestore?.Collection("users").Document(uid);
 		await document?.SetAsync(user.ToDocument())!;
 		
-		return user.ToJson();
+		return user.ToResponse();
 	}
 }

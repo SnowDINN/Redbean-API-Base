@@ -10,15 +10,15 @@ namespace Redbean.Api.Controllers;
 public class StorageController : ControllerBase
 {
 	[HttpGet]
-	public Task<string> GetTable(string version) => GetTableAsync($"Table/{version}/");
+	public Task<Response> GetTable(string version) => GetTableAsync($"Table/{version}/");
 	
 	[HttpPost]
-	public Task<string> PostTableFiles(string version, IFormFile[] tables) => PostFilesAsync($"Table/{version}/", tables);
+	public Task<Response> PostTableFiles(string version, IFormFile[] tables) => PostFilesAsync($"Table/{version}/", tables);
 
 	[HttpPost]
-	public Task<string> PostBundleFiles(string version, int type, IFormFile[] bundles) => PostFilesAsync($"Bundle/{version}/{(MobileType)type}/", bundles);
+	public Task<Response> PostBundleFiles(string version, int type, IFormFile[] bundles) => PostFilesAsync($"Bundle/{version}/{(MobileType)type}/", bundles);
 
-	private async Task<string> GetTableAsync(string path)
+	private async Task<Response> GetTableAsync(string path)
 	{
 		var dictionary = new Dictionary<string, object>();
 		
@@ -34,22 +34,22 @@ public class StorageController : ControllerBase
 			dictionary.Add(tableName, Encoding.UTF8.GetString(memoryStream.ToArray()));
 		}
 
-		return dictionary.ToJson();
+		return dictionary.ToResponse();
 	}
 	
-	private Task<string> GetFiles(string path)
+	private Task<Response> GetFiles(string path)
 	{
-		var completionSource = new TaskCompletionSource<string>();
+		var completionSource = new TaskCompletionSource<Response>();
 		
 		var objects = FirebaseSetting.Storage?.ListObjects(FirebaseSetting.StorageBucket, path)!;
 		var objectList = objects?.Select(obj => obj.Name).ToList()!;
 		if (objectList != null)
-			completionSource.SetResult(objectList.ToJson());
+			completionSource.SetResult(objectList.ToResponse());
 
 		return completionSource.Task;
 	}
 
-	private async Task<string> PostFilesAsync(string path, IEnumerable<IFormFile> files)
+	private async Task<Response> PostFilesAsync(string path, IEnumerable<IFormFile> files)
 	{
 		await DeleteFiles(path);
 
@@ -65,16 +65,14 @@ public class StorageController : ControllerBase
 			await FirebaseSetting.Storage?.UploadObjectAsync(obj, file.OpenReadStream())!;	
 		}
 		
-		return files.Select(_ => _.FileName).ToList().ToJson();
+		return files.Select(_ => _.FileName).ToList().ToResponse();
 	}
 	
-	private async Task<string> DeleteFiles(string path)
+	private async Task DeleteFiles(string path)
 	{
 		var objects = FirebaseSetting.Storage?.ListObjects(FirebaseSetting.StorageBucket, path)!;
 		var objectList = objects?.Select(obj => obj.Name).ToList()!;
 		foreach (var obj in objectList)
 			await FirebaseSetting.Storage?.DeleteObjectAsync($"{FirebaseSetting.Id}.appspot.com", obj)!;
-		
-		return objectList.ToJson();
 	}
 }
