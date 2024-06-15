@@ -17,39 +17,58 @@ public class AuthenticationController : ControllerBase
 	[HttpGet]
 	public async Task<Response> GetUser(string uid, string version)
 	{
+		const string userKey = "user";
+		const string tokenKey = "token";
+		
 		if (uid == App.AdministratorCode)
 			return new Dictionary<string, object>
 			{
-				{ "user", new UserResponse { Information = { Nickname = "Administrator" } } },
-				{ "token", GetAccessToken(uid, version) }
+				{ userKey, null! },
+				{ tokenKey, GetAccessToken(uid, version) }
 			}.ToResponse();
+
+		UserResponse? user;
+		try
+		{
+			var userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
+			user = new UserResponse
+			{
+				Social =
+				{
+					Id = userRecord.Uid,
+					Platform = userRecord.ProviderData.First().ProviderId
+				},
+				Information =
+				{
+					Nickname = userRecord.ProviderData.First().DisplayName
+				}
+			};
+		}
+		catch (FirebaseAuthException)
+		{
+			return new Dictionary<string, object>
+			{
+				{ userKey, null! },
+				{ tokenKey, null! }
+			}!.ToResponse(ApiErrorType.NotExist);
+		}
 		
 		var equalTo = FirebaseSetting.Firestore?.Collection("users").WhereEqualTo("social.id", uid);
 		var querySnapshot = await equalTo?.GetSnapshotAsync()!;
 		if (querySnapshot.Count != 0)
-			return querySnapshot.Documents.First().ToDictionary().ToResponse();
-		
-		var userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
-		var user = new UserResponse
-		{
-			Social =
+			return  new Dictionary<string, object>
 			{
-				Id = userRecord.Uid,
-				Platform = userRecord.ProviderData.First().ProviderId
-			},
-			Information =
-			{
-				Nickname = userRecord.ProviderData.First().DisplayName
-			}
-		};
+				{ userKey, querySnapshot.Documents.First().ToDictionary() },
+				{ tokenKey, GetAccessToken(uid, version) }
+			}.ToResponse();
 		
 		var document = FirebaseSetting.Firestore?.Collection("users").Document(uid);
 		await document?.SetAsync(user.ToDocument())!;
 
 		return new Dictionary<string, object>
 		{
-			{ "user", user.ToResponse() },
-			{ "token", GetAccessToken(uid, version) }
+			{ userKey, user.ToResponse() },
+			{ tokenKey, GetAccessToken(uid, version) }
 		}.ToResponse();
 	}
 	

@@ -8,7 +8,7 @@ namespace Redbean.Api.Controllers;
 [Route("[controller]/[action]")]
 public class ConfigController : ControllerBase
 {
-	[HttpGet, ApiAuthorize(Role.Administrator)]
+	[HttpGet]
 	public async Task<Response> GetAppConfig() => await GetConfigAsync("app");
 	
 	[HttpGet, ApiAuthorize(Role.Administrator)]
