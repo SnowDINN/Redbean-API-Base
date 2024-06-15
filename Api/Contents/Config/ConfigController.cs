@@ -8,13 +8,13 @@ namespace Redbean.Api.Controllers;
 [Route("[controller]/[action]")]
 public class ConfigController : ControllerBase
 {
-	[HttpGet]
+	[HttpGet, ApiAuthorize(Role.Administrator)]
 	public async Task<Response> GetAppConfig() => await GetConfigAsync("app");
 	
-	[HttpGet]
+	[HttpGet, ApiAuthorize(Role.Administrator)]
 	public async Task<Response> GetTableConfig() => await GetConfigAsync("table");
 	
-	[HttpPost]
+	[HttpPost, ApiAuthorize(Role.Administrator)]
 	public async Task<Response> PostAppVersion(string version, int type) => await PostVersionAsync((MobileType)type, version);
 
 	private async Task<Response> GetConfigAsync(string path)
