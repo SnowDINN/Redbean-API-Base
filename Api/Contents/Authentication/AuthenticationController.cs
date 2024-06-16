@@ -29,10 +29,10 @@ public class AuthenticationController : ControllerBase
 		}
 		catch (FirebaseAuthException)
 		{
-			return Unauthorized();
+			return BadRequest();
 		}
 
-		return Unauthorized();
+		return BadRequest();
 	}
 	
 	[HttpGet]
