@@ -9,25 +9,25 @@ namespace Redbean.Api.Controllers;
 public class ConfigController : ControllerBase
 {
 	[HttpGet]
-	public async Task<Response> GetAppConfig() => await GetConfigAsync("app");
+	public async Task<ActionResult> GetAppConfig() => await GetConfigAsync("app");
 	
 	[HttpGet, ApiAuthorize(Role.Administrator)]
-	public async Task<Response> GetTableConfig() => await GetConfigAsync("table");
+	public async Task<ActionResult> GetTableConfig() => await GetConfigAsync("table");
 	
 	[HttpPost, ApiAuthorize(Role.Administrator)]
-	public async Task<Response> PostAppVersion(string version, int type) => await PostVersionAsync((MobileType)type, version);
+	public async Task<ActionResult> PostAppVersion(string version, int type) => await PostVersionAsync((MobileType)type, version);
 
-	private async Task<Response> GetConfigAsync(string path)
+	private async Task<ActionResult> GetConfigAsync(string path)
 	{
 		var document = FirebaseSetting.Firestore?.Collection("config").Document(path)!;
 		var snapshot = await document.GetSnapshotAsync()!;
 		if (snapshot.Exists)
-			return snapshot.ToDictionary().ToResponse();
+			return Ok(snapshot.ToDictionary().ToResponse());
 
-		return "Config not found".ToResponse(ApiErrorType.NotExist);
+		return Ok("Config not found".ToResponse(ApiErrorType.NotExist));
 	}
 	
-	private async Task<Response> PostVersionAsync(MobileType type, string version)
+	private async Task<ActionResult> PostVersionAsync(MobileType type, string version)
 	{
 		var document = FirebaseSetting.Firestore?.Collection("config").Document("app")!;
 		var snapshot = await document.GetSnapshotAsync()!;
@@ -55,9 +55,9 @@ public class ConfigController : ControllerBase
 			
 			await document.SetAsync(config.ToDocument());
 			
-			return response.ToResponse();
+			return Ok(response.ToResponse());
 		}
 
-		return "Config not found".ToResponse(ApiErrorType.NotExist);
+		return Ok("Config not found".ToResponse(ApiErrorType.NotExist));
 	}
 }

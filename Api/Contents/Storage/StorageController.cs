@@ -10,15 +10,15 @@ namespace Redbean.Api.Controllers;
 public class StorageController : ControllerBase
 {
 	[HttpGet, ApiAuthorize(Role.Administrator, Role.User)]
-	public Task<Response> GetTable(string version) => GetTableAsync($"Table/{version}/");
+	public Task<ActionResult> GetTable(string version) => GetTableAsync($"Table/{version}/");
 	
 	[HttpPost, ApiAuthorize(Role.Administrator)]
-	public Task<Response> PostTableFiles(string version, IFormFile[] tables) => PostFilesAsync($"Table/{version}/", tables);
+	public Task<ActionResult> PostTableFiles(string version, IFormFile[] tables) => PostFilesAsync($"Table/{version}/", tables);
 
 	[HttpPost, ApiAuthorize(Role.Administrator)]
-	public Task<Response> PostBundleFiles(string version, int type, IFormFile[] bundles) => PostFilesAsync($"Bundle/{version}/{(MobileType)type}/", bundles);
+	public Task<ActionResult> PostBundleFiles(string version, int type, IFormFile[] bundles) => PostFilesAsync($"Bundle/{version}/{(MobileType)type}/", bundles);
 
-	private async Task<Response> GetTableAsync(string path)
+	private async Task<ActionResult> GetTableAsync(string path)
 	{
 		var dictionary = new Dictionary<string, object>();
 		
@@ -34,22 +34,22 @@ public class StorageController : ControllerBase
 			dictionary.Add(tableName, Encoding.UTF8.GetString(memoryStream.ToArray()));
 		}
 
-		return dictionary.ToResponse();
+		return Ok(dictionary.ToResponse());
 	}
 	
-	private Task<Response> GetFiles(string path)
+	private Task<ActionResult> GetFiles(string path)
 	{
-		var completionSource = new TaskCompletionSource<Response>();
+		var completionSource = new TaskCompletionSource<ActionResult>();
 		
 		var objects = FirebaseSetting.Storage?.ListObjects(FirebaseSetting.StorageBucket, path)!;
 		var objectList = objects?.Select(obj => obj.Name).ToList()!;
 		if (objectList != null)
-			completionSource.SetResult(objectList.ToResponse());
+			completionSource.SetResult(Ok(objectList.ToResponse()));
 
 		return completionSource.Task;
 	}
 
-	private async Task<Response> PostFilesAsync(string path, IEnumerable<IFormFile> files)
+	private async Task<ActionResult> PostFilesAsync(string path, IEnumerable<IFormFile> files)
 	{
 		await DeleteFiles(path);
 
@@ -65,7 +65,7 @@ public class StorageController : ControllerBase
 			await FirebaseSetting.Storage?.UploadObjectAsync(obj, file.OpenReadStream())!;	
 		}
 		
-		return files.Select(_ => _.FileName).ToList().ToResponse();
+		return Ok(files.Select(_ => _.FileName).ToList().ToResponse());
 	}
 	
 	private async Task DeleteFiles(string path)

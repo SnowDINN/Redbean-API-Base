@@ -18,25 +18,25 @@ public class AuthenticationController : ControllerBase
 	private const string tokenKey = "token";
 
 	[HttpGet]
-	public async Task<Response> GetToken(string uid)
+	public async Task<ActionResult> GetToken(string uid)
 	{
 		try
 		{
 			var userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
 			
 			if (App.AdministratorEmail.Contains(userRecord.Email))
-				return GetTokenAsync(uid, userRecord.Email).ToResponse();
+				return Ok(GetTokenAsync(uid, userRecord.Email).ToResponse());
 		}
 		catch (FirebaseAuthException)
 		{
-			return "User not found".ToResponse(ApiErrorType.NotExist);
+			return Unauthorized();
 		}
 
-		return "User not found".ToResponse(ApiErrorType.NotExist);
+		return Unauthorized();
 	}
 	
 	[HttpGet]
-	public async Task<Response> GetUser(string uid)
+	public async Task<ActionResult> GetUser(string uid)
 	{
 		UserResponse? user;
 		string? email;
@@ -61,30 +61,26 @@ public class AuthenticationController : ControllerBase
 		}
 		catch (FirebaseAuthException)
 		{
-			return new Dictionary<string, object>
-			{
-				{ userKey, null! },
-				{ tokenKey, null! }
-			}!.ToResponse(ApiErrorType.NotExist);
+			return BadRequest();
 		}
 		
 		var equalTo = FirebaseSetting.Firestore?.Collection("users").WhereEqualTo("social.id", uid);
 		var querySnapshot = await equalTo?.GetSnapshotAsync()!;
 		if (querySnapshot.Count != 0)
-			return  new Dictionary<string, object>
+			return Ok(new Dictionary<string, object>
 			{
 				{ userKey, querySnapshot.Documents[0].ToDictionary() },
 				{ tokenKey, GetTokenAsync(uid, email) }
-			}.ToResponse();
+			}.ToResponse());
 		
 		var document = FirebaseSetting.Firestore?.Collection("users").Document(uid);
 		await document?.SetAsync(user.ToDocument())!;
 
-		return new Dictionary<string, object>
+		return Ok(new Dictionary<string, object>
 		{
 			{ userKey, user.ToResponse() },
 			{ tokenKey, GetTokenAsync(uid, email) }
-		}.ToResponse();
+		}.ToResponse());
 	}
 	
 	private AccessTokenResponse GetTokenAsync(string uid, string email)
