@@ -5,8 +5,8 @@ namespace Redbean.Api;
 public class App
 {
 	public static byte[] SecurityKey { get; set; } = Encoding.ASCII.GetBytes($"{Guid.NewGuid()}".Replace("-", ""));
-	
-	public const string AdministratorCode = "redbean.boongsin.admin";
+
+	public static string[] AdministratorEmail { get; set; } = ["mfactory86@gmail.com"];
 }
 
 public class Role

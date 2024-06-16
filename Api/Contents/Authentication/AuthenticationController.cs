@@ -12,22 +12,35 @@ namespace Redbean.Api.Controllers;
 [Route("[controller]/[action]")]
 public class AuthenticationController : ControllerBase
 {
-	private const long ExpiresTime = 1800;
+	private const long ExpiresTime = 10;
+	
+	private const string userKey = "user";
+	private const string tokenKey = "token";
+
+	[HttpGet]
+	public async Task<Response> GetToken(string uid)
+	{
+		try
+		{
+			var userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
+			
+			if (App.AdministratorEmail.Contains(userRecord.Email))
+				return GetTokenAsync(uid, userRecord.Email).ToResponse();
+		}
+		catch (FirebaseAuthException)
+		{
+			return "User not found".ToResponse(ApiErrorType.NotExist);
+		}
+
+		return "User not found".ToResponse(ApiErrorType.NotExist);
+	}
 	
 	[HttpGet]
-	public async Task<Response> GetUser(string uid, string version)
+	public async Task<Response> GetUser(string uid)
 	{
-		const string userKey = "user";
-		const string tokenKey = "token";
-		
-		if (uid == App.AdministratorCode)
-			return new Dictionary<string, object>
-			{
-				{ userKey, null! },
-				{ tokenKey, GetAccessToken(uid, version) }
-			}.ToResponse();
-
 		UserResponse? user;
+		string? email;
+		
 		try
 		{
 			var userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
@@ -36,13 +49,15 @@ public class AuthenticationController : ControllerBase
 				Social =
 				{
 					Id = userRecord.Uid,
-					Platform = userRecord.ProviderData.First().ProviderId
+					Platform = userRecord.ProviderData[0].ProviderId
 				},
 				Information =
 				{
-					Nickname = userRecord.ProviderData.First().DisplayName
+					Nickname = userRecord.ProviderData[0].DisplayName
 				}
 			};
+
+			email = userRecord.Email;
 		}
 		catch (FirebaseAuthException)
 		{
@@ -58,8 +73,8 @@ public class AuthenticationController : ControllerBase
 		if (querySnapshot.Count != 0)
 			return  new Dictionary<string, object>
 			{
-				{ userKey, querySnapshot.Documents.First().ToDictionary() },
-				{ tokenKey, GetAccessToken(uid, version) }
+				{ userKey, querySnapshot.Documents[0].ToDictionary() },
+				{ tokenKey, GetTokenAsync(uid, email) }
 			}.ToResponse();
 		
 		var document = FirebaseSetting.Firestore?.Collection("users").Document(uid);
@@ -68,19 +83,19 @@ public class AuthenticationController : ControllerBase
 		return new Dictionary<string, object>
 		{
 			{ userKey, user.ToResponse() },
-			{ tokenKey, GetAccessToken(uid, version) }
+			{ tokenKey, GetTokenAsync(uid, email) }
 		}.ToResponse();
 	}
 	
-	private AccessTokenResponse GetAccessToken(string uid, string version)
+	private AccessTokenResponse GetTokenAsync(string uid, string email)
 	{
 		var tokenHandler = new JwtSecurityTokenHandler();
 		var token = new JwtSecurityToken(expires: DateTime.UtcNow.AddSeconds(ExpiresTime),
 		                                 claims: new[]
 		                                 {
 			                                 new Claim(ClaimTypes.NameIdentifier, uid),
-			                                 new Claim(ClaimTypes.Version, version),
-			                                 new Claim(ClaimTypes.Role, uid == App.AdministratorCode ? Role.Administrator : Role.User)
+			                                 new Claim(ClaimTypes.Email, email),
+			                                 new Claim(ClaimTypes.Role, App.AdministratorEmail.Contains(email) ? Role.Administrator : Role.User)
 		                                 },
 		                                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(App.SecurityKey), SecurityAlgorithms.HmacSha256Signature));
 
