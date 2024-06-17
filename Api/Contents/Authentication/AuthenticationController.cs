@@ -1,5 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Web;
 using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -22,10 +23,11 @@ public class AuthenticationController : ControllerBase
 	{
 		try
 		{
-			var userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
+			var userId = HttpUtility.UrlDecode(uid.Decrypt());
+			var userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(userId);
 			
 			if (App.AdministratorEmail.Contains(userRecord.Email))
-				return Ok(GetTokenAsync(uid, userRecord.Email).ToResponse());
+				return Ok(GetTokenAsync(userId, userRecord.Email).ToResponse());
 		}
 		catch (FirebaseAuthException)
 		{
@@ -41,14 +43,16 @@ public class AuthenticationController : ControllerBase
 		UserResponse? user;
 		string? email;
 		
+		var userId = HttpUtility.UrlDecode(uid.Decrypt());
+		
 		try
 		{
-			var userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
+			var userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(userId);
 			user = new UserResponse
 			{
 				Social =
 				{
-					Id = userRecord.Uid,
+					Id = userRecord.Uid.Encrypt(),
 					Platform = userRecord.ProviderData[0].ProviderId
 				},
 				Information =
@@ -64,22 +68,22 @@ public class AuthenticationController : ControllerBase
 			return BadRequest();
 		}
 		
-		var equalTo = FirebaseSetting.Firestore?.Collection("users").WhereEqualTo("social.id", uid);
+		var equalTo = FirebaseSetting.Firestore?.Collection("users").WhereEqualTo("social.id", userId);
 		var querySnapshot = await equalTo?.GetSnapshotAsync()!;
 		if (querySnapshot.Count != 0)
 			return Ok(new Dictionary<string, object>
 			{
 				{ userKey, querySnapshot.Documents[0].ToDictionary() },
-				{ tokenKey, GetTokenAsync(uid, email) }
+				{ tokenKey, GetTokenAsync(userId, email) }
 			}.ToResponse());
 		
-		var document = FirebaseSetting.Firestore?.Collection("users").Document(uid);
+		var document = FirebaseSetting.Firestore?.Collection("users").Document(userId);
 		await document?.SetAsync(user.ToDocument())!;
 
 		return Ok(new Dictionary<string, object>
 		{
 			{ userKey, user.ToResponse() },
-			{ tokenKey, GetTokenAsync(uid, email) }
+			{ tokenKey, GetTokenAsync(userId, email) }
 		}.ToResponse());
 	}
 	
@@ -89,8 +93,8 @@ public class AuthenticationController : ControllerBase
 		var token = new JwtSecurityToken(expires: DateTime.UtcNow.AddSeconds(ExpiresTime),
 		                                 claims: new[]
 		                                 {
-			                                 new Claim(ClaimTypes.NameIdentifier, uid),
-			                                 new Claim(ClaimTypes.Email, email),
+			                                 new Claim(ClaimTypes.NameIdentifier, uid.Encrypt()),
+			                                 new Claim(ClaimTypes.Email, email.Encrypt()),
 			                                 new Claim(ClaimTypes.Role, App.AdministratorEmail.Contains(email) ? Role.Administrator : Role.User)
 		                                 },
 		                                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(App.SecurityKey), SecurityAlgorithms.HmacSha256Signature));
