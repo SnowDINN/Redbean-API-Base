@@ -36,18 +36,6 @@ public class StorageController : ControllerBase
 
 		return Ok(dictionary.ToResponse());
 	}
-	
-	private Task<ActionResult> GetFiles(string path)
-	{
-		var completionSource = new TaskCompletionSource<ActionResult>();
-		
-		var objects = FirebaseSetting.Storage?.ListObjects(FirebaseSetting.StorageBucket, path)!;
-		var objectList = objects?.Select(obj => obj.Name).ToList()!;
-		if (objectList != null)
-			completionSource.SetResult(Ok(objectList.ToResponse()));
-
-		return completionSource.Task;
-	}
 
 	private async Task<ActionResult> PostFilesAsync(string path, IEnumerable<IFormFile> files)
 	{
