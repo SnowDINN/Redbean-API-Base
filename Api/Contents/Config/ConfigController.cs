@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Redbean.Extension;
+﻿using System.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
 using Redbean.Firebase;
 
 namespace Redbean.Api.Controllers;
@@ -29,35 +29,19 @@ public class ConfigController : ControllerBase
 	
 	private async Task<ActionResult> PostVersionAsync(MobileType type, string version)
 	{
-		var document = FirebaseSetting.Firestore?.Collection("config").Document("app")!;
-		var snapshot = await document.GetSnapshotAsync()!;
-		if (snapshot.Exists)
+		var key = $"{type}".ToLower() + ".version";
+		
+		var document = FirebaseSetting.Firestore?.Collection("config").Document("app");
+		var snapshotAsync = await document?.GetSnapshotAsync()!;
+		
+		var response = new AppVersionResponse
 		{
-			var config = snapshot.ToConvert<AppConfigResponse>();
-			var response = new AppVersionResponse();
-			
-			switch (type)
-			{
-				case MobileType.Android:
-					response.BeforeVersion = config?.Android.Version!;
-					response.AfterVersion = version;
-					if (config != null)
-						config.Android.Version = version;
-					break;
-				
-				case MobileType.iOS:
-					response.BeforeVersion = config?.iOS.Version!;
-					response.AfterVersion = version;
-					if (config != null)
-						config.iOS.Version = version;
-					break;
-			}
-			
-			await document.SetAsync(config.ToDocument());
-			
-			return Ok(response.ToResponse());
-		}
-
-		return Ok("Config not found".ToResponse(ApiErrorType.NotExist));
+			BeforeVersion = snapshotAsync.GetValue<string>(key),
+			AfterVersion = version
+		};
+		
+		await document.UpdateAsync(key, version);
+		
+		return Ok(response.ToResponse());
 	}
 }

@@ -13,7 +13,7 @@ namespace Redbean.Api.Controllers;
 [Route("[controller]/[action]")]
 public class AuthenticationController : ControllerBase
 {
-	private const long ExpiresTime = 10;
+	private const long ExpiresTime = 600;
 	
 	private const string userKey = "user";
 	private const string tokenKey = "token";
@@ -87,22 +87,23 @@ public class AuthenticationController : ControllerBase
 		}.ToResponse());
 	}
 	
-	private AccessTokenResponse GetTokenAsync(string uid, string email)
+	private TokenResponse GetTokenAsync(string uid, string email)
 	{
 		var tokenHandler = new JwtSecurityTokenHandler();
-		var token = new JwtSecurityToken(expires: DateTime.UtcNow.AddSeconds(ExpiresTime),
+		var tokenExpires = DateTime.UtcNow.AddSeconds(ExpiresTime);
+		
+		var token = new JwtSecurityToken(expires: tokenExpires,
 		                                 claims: new[]
 		                                 {
 			                                 new Claim(ClaimTypes.NameIdentifier, uid.Encrypt()),
-			                                 new Claim(ClaimTypes.Email, email.Encrypt()),
 			                                 new Claim(ClaimTypes.Role, App.AdministratorEmail.Contains(email) ? Role.Administrator : Role.User)
 		                                 },
 		                                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(App.SecurityKey), SecurityAlgorithms.HmacSha256Signature));
 
-		var tokenResponse = new AccessTokenResponse
+		var tokenResponse = new TokenResponse
 		{
 			AccessToken = tokenHandler.WriteToken(token),
-			Expires = ExpiresTime
+			Expires = tokenExpires
 		};
 		
 		return tokenResponse;
