@@ -9,21 +9,21 @@ namespace Redbean.Api.Controllers;
 public class ConfigController : ControllerBase
 {
 	[HttpGet]
-	public async Task<ActionResult> GetAppConfig() =>
+	public async Task<IActionResult> GetAppConfig() =>
 		await GetConfigAsync("app");
 	
 	[HttpGet, ApiAuthorize(Role.Administrator)]
-	public async Task<ActionResult> GetTableConfig() => 
+	public async Task<IActionResult> GetTableConfig() => 
 		await GetConfigAsync("table");
 	
 	[HttpPost, ApiAuthorize(Role.Administrator)]
 	public async Task<ActionResult> PostAppVersion(string version, int type) => 
 		await PostVersionAsync((MobileType)type, version);
 
-	private async Task<ActionResult> GetConfigAsync(string path)
+	private async Task<IActionResult> GetConfigAsync(string path)
 	{
 		var redis = Redis.GetValue(RedisKey.APP_CONFIG);
-		if (string.IsNullOrEmpty(redis))
+		if (!string.IsNullOrEmpty(redis))
 			return Ok(redis);
 		
 		var document = FirebaseSetting.Firestore?.Collection("config").Document(path);
