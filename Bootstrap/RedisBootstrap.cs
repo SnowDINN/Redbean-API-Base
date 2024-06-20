@@ -1,20 +1,35 @@
-﻿using Newtonsoft.Json;
+﻿#pragma warning disable CS8602
+#pragma warning disable CS8603
+
+using Newtonsoft.Json;
+using Redbean.Api;
 using StackExchange.Redis;
+using RedisKey = Redbean.Api.RedisKey;
 
 namespace Redbean;
 
 public class RedisBootstrap : IBootstrap
 {
-	public static ConnectionMultiplexer? Redis { get; private set; }
-	
+	public int ExecutionOrder => 20;
+
 	public async Task Setup()
 	{
-		Redis = await ConnectionMultiplexer.ConnectAsync("localhost:6379");
+		await Redis.Initialize();
+		
+		var collection = FirebaseSetting.Firestore?.Collection("config");
+		collection.Document("app").Listen(async _ =>
+		{
+			await Redis.SetValue(RedisKey.APP_CONFIG, _.ToDictionary().ToResponse());
+		});
+		collection.Document("table").Listen(async _ =>
+		{
+			await Redis.SetValue(RedisKey.TABLE_CONFIG, _.ToDictionary().ToResponse());
+		});
 	}
 
 	public async void Dispose()
 	{
-		await Redis.DisposeAsync();
+		await Redis.Multiplexer.DisposeAsync();
 		
 		GC.SuppressFinalize(this);
 	}
@@ -22,9 +37,15 @@ public class RedisBootstrap : IBootstrap
 
 public class Redis
 {
-	private static IDatabase? db => RedisBootstrap.Redis?.GetDatabase();
-	
-	public static string GetValue(string key) => db.StringGet(key);
+	public static ConnectionMultiplexer? Multiplexer { get; private set; }
+	private static IDatabase? db => Multiplexer?.GetDatabase();
 
-	public static void SetValue(string key, object value) => db.StringSet(key, JsonConvert.SerializeObject(value));
+	public static async Task Initialize()
+	{
+		Multiplexer = await ConnectionMultiplexer.ConnectAsync("localhost:6379");
+	}
+	
+	public static async Task<string> GetValue(string key) => await db?.StringGetAsync(key);
+
+	public static async Task<string> SetValue(string key, object value) => await db?.StringGetSetAsync(key, JsonConvert.SerializeObject(value));
 }

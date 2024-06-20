@@ -41,6 +41,11 @@ public class AuthorizationBody
 	public string Version { get; set; } = "";
 }
 
+public class ContentType
+{
+	public const string Json = "application/json";
+}
+
 public class Role
 {
 	public const string Administrator = "Redbean.Boongsin.Administrator";
@@ -50,4 +55,5 @@ public class Role
 public class RedisKey
 {
 	public const string APP_CONFIG = nameof(APP_CONFIG);
+	public const string TABLE_CONFIG = nameof(TABLE_CONFIG);
 }

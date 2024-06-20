@@ -7,6 +7,8 @@ namespace Redbean;
 
 public class FirebaseBootstrap : IBootstrap
 {
+	public int ExecutionOrder => 10;
+
 	public async Task Setup()
 	{
 		var environmentPath = $@"{Directory.GetCurrentDirectory()}\Environment\Firebase\DEV.json";

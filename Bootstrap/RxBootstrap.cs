@@ -6,7 +6,9 @@ namespace Redbean;
 public class RxBootstrap : IBootstrap
 {
 	private static readonly CompositeDisposable disposables = new();
-	
+
+	public int ExecutionOrder => 30;
+
 	public Task Setup()
 	{
 #region Refresh Token Expired Validation
