@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Redbean;
 using Redbean.Api;
-using Redbean.Firebase;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAuthentication(options =>
@@ -59,6 +59,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 FirebaseBootstrap.Setup();
+RxBootstrap.Setup();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())

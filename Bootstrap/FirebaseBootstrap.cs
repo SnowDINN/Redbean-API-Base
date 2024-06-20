@@ -1,12 +1,11 @@
 ﻿using FirebaseAdmin;
-using FirebaseAdmin.Auth;
 using Google.Cloud.Firestore;
 using Google.Cloud.Storage.V1;
 using Newtonsoft.Json.Linq;
 
-namespace Redbean.Firebase;
+namespace Redbean;
 
-public class FirebaseBootstrap
+public class FirebaseBootstrap : IDisposable
 {
 	public static async void Setup()
 	{
@@ -23,6 +22,13 @@ public class FirebaseBootstrap
 		FirebaseSetting.Storage = await StorageClient.CreateAsync();
 		
 		FirebaseApp.Create();
+	}
+
+	public void Dispose()
+	{
+		FirebaseSetting.Storage?.Dispose();
+		
+		GC.SuppressFinalize(this);
 	}
 }
 

@@ -2,7 +2,6 @@
 
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
-using Redbean.Firebase;
 using Object = Google.Apis.Storage.v1.Data.Object;
 
 namespace Redbean.Api.Controllers;

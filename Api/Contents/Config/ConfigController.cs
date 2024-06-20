@@ -1,7 +1,6 @@
 ﻿#pragma warning disable CS8602
 
 using Microsoft.AspNetCore.Mvc;
-using Redbean.Firebase;
 
 namespace Redbean.Api.Controllers;
 

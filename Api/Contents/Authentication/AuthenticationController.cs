@@ -7,7 +7,6 @@ using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Redbean.Extension;
-using Redbean.Firebase;
 
 namespace Redbean.Api.Controllers;
 
