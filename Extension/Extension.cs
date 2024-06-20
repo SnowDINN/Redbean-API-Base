@@ -1,4 +1,7 @@
-﻿using Google.Cloud.Firestore;
+﻿#pragma warning disable CS8602
+#pragma warning disable CS8603
+
+using Google.Cloud.Firestore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 

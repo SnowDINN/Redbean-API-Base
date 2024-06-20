@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿#pragma warning disable CS8602
+
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Redbean.Firebase;
 using Object = Google.Apis.Storage.v1.Data.Object;
@@ -22,11 +24,11 @@ public class StorageController : ControllerBase
 	{
 		var dictionary = new Dictionary<string, object>();
 		
-		var objects = FirebaseSetting.Storage?.ListObjects(FirebaseSetting.StorageBucket, path)!;
+		var objects = FirebaseSetting.Storage?.ListObjects(FirebaseSetting.StorageBucket, path);
 		foreach (var obj in objects)
 		{
 			using var memoryStream = new MemoryStream();
-			var table = await FirebaseSetting.Storage?.DownloadObjectAsync(obj, memoryStream)!;
+			var table = await FirebaseSetting.Storage?.DownloadObjectAsync(obj, memoryStream);
 
 			var fileName = table.Name.Split('/').Last();
 			var tableName = fileName.Split('.').First();
@@ -50,7 +52,7 @@ public class StorageController : ControllerBase
 				CacheControl = "no-store",
 			};
 
-			await FirebaseSetting.Storage?.UploadObjectAsync(obj, file.OpenReadStream())!;	
+			await FirebaseSetting.Storage?.UploadObjectAsync(obj, file.OpenReadStream());	
 		}
 		
 		return Ok(files.Select(_ => _.FileName).ToList().ToResponse());
@@ -58,9 +60,9 @@ public class StorageController : ControllerBase
 	
 	private async Task DeleteFiles(string path)
 	{
-		var objects = FirebaseSetting.Storage?.ListObjects(FirebaseSetting.StorageBucket, path)!;
-		var objectList = objects?.Select(obj => obj.Name).ToList()!;
+		var objects = FirebaseSetting.Storage?.ListObjects(FirebaseSetting.StorageBucket, path);
+		var objectList = objects?.Select(obj => obj.Name).ToList();
 		foreach (var obj in objectList)
-			await FirebaseSetting.Storage?.DeleteObjectAsync($"{FirebaseSetting.Id}.appspot.com", obj)!;
+			await FirebaseSetting.Storage?.DeleteObjectAsync($"{FirebaseSetting.Id}.appspot.com", obj);
 	}
 }

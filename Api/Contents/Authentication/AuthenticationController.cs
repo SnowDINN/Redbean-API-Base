@@ -1,4 +1,6 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿#pragma warning disable CS8602
+
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Web;
 using FirebaseAdmin.Auth;
@@ -13,7 +15,8 @@ namespace Redbean.Api.Controllers;
 [Route("[controller]/[action]")]
 public class AuthenticationController : ControllerBase
 {
-	private const long ExpiresTime = 600;
+	private const long AccessTokenExpireSecond = 600;
+	private const long RefreshTokenExpireSecond = 600;
 	
 	private const string userKey = "user";
 	private const string tokenKey = "token";
@@ -24,9 +27,9 @@ public class AuthenticationController : ControllerBase
 		try
 		{
 			var userId = HttpUtility.UrlDecode(uid.Decrypt());
-			var userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(userId);
+			var userRecord = await FirebaseAuth.DefaultInstance?.GetUserAsync(userId);
 			
-			if (App.AdministratorEmail.Contains(userRecord.Email))
+			if (App.AdministratorKey.Contains(userRecord.Email))
 				return Ok(GetTokenAsync(userId, userRecord.Email).ToResponse());
 		}
 		catch (FirebaseAuthException)
@@ -47,7 +50,7 @@ public class AuthenticationController : ControllerBase
 		
 		try
 		{
-			var userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(userId);
+			var userRecord = await FirebaseAuth.DefaultInstance?.GetUserAsync(userId);
 			user = new UserResponse
 			{
 				Social =
@@ -69,7 +72,7 @@ public class AuthenticationController : ControllerBase
 		}
 		
 		var equalTo = FirebaseSetting.Firestore?.Collection("users").WhereEqualTo("social.id", userId);
-		var querySnapshot = await equalTo?.GetSnapshotAsync()!;
+		var querySnapshot = await equalTo?.GetSnapshotAsync();
 		if (querySnapshot.Count != 0)
 			return Ok(new Dictionary<string, object>
 			{
@@ -78,7 +81,7 @@ public class AuthenticationController : ControllerBase
 			}.ToResponse());
 		
 		var document = FirebaseSetting.Firestore?.Collection("users").Document(userId);
-		await document?.SetAsync(user.ToDocument())!;
+		await document?.SetAsync(user.ToDocument());
 
 		return Ok(new Dictionary<string, object>
 		{
@@ -89,23 +92,25 @@ public class AuthenticationController : ControllerBase
 	
 	private TokenResponse GetTokenAsync(string uid, string email)
 	{
-		var tokenHandler = new JwtSecurityTokenHandler();
-		var tokenExpires = DateTime.UtcNow.AddSeconds(ExpiresTime);
+		var accessTokenExpire = DateTime.UtcNow.AddSeconds(AccessTokenExpireSecond);
+		var refreshTokenExpire = DateTime.UtcNow.AddSeconds(RefreshTokenExpireSecond);
 		
-		var token = new JwtSecurityToken(expires: tokenExpires,
+		var accessToken = new JwtSecurityToken(expires: accessTokenExpire,
 		                                 claims: new[]
 		                                 {
 			                                 new Claim(ClaimTypes.NameIdentifier, uid.Encrypt()),
-			                                 new Claim(ClaimTypes.Role, App.AdministratorEmail.Contains(email) ? Role.Administrator : Role.User)
+			                                 new Claim(ClaimTypes.Role, App.AdministratorKey.Contains(email) ? Role.Administrator : Role.User)
 		                                 },
-		                                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(App.SecurityKey), SecurityAlgorithms.HmacSha256Signature));
-
-		var tokenResponse = new TokenResponse
-		{
-			AccessToken = tokenHandler.WriteToken(token),
-			Expires = tokenExpires
-		};
+		                                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(App.SecurityKey), SecurityAlgorithms.HmacSha256));
+		var refreshToken = $"{Guid.NewGuid()}".Replace("-", "");
 		
-		return tokenResponse;
+		App.RefreshTokens[uid] = new TokenResponse
+		{
+			AccessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
+			RefreshToken = refreshToken,
+			AccessTokenExpire = accessTokenExpire,
+			RefreshTokenExpire = refreshTokenExpire,
+		};
+		return App.RefreshTokens[uid];
 	}
 }

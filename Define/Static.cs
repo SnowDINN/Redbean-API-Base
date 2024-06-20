@@ -4,9 +4,10 @@ namespace Redbean.Api;
 
 public class App
 {
-	public static byte[] SecurityKey { get; set; } = Encoding.ASCII.GetBytes($"{Guid.NewGuid()}".Replace("-", ""));
-
-	public static string[] AdministratorEmail { get; set; } = ["mfactory86@gmail.com"];
+	public static readonly Dictionary<string, TokenResponse> RefreshTokens = new();
+	
+	public static readonly byte[] SecurityKey = Encoding.ASCII.GetBytes($"{Guid.NewGuid()}".Replace("-", ""));
+	public static readonly string[] AdministratorKey = ["mfactory86@gmail.com"];
 }
 
 public class Role

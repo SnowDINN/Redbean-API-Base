@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿#pragma warning disable CS8602
+
+using Microsoft.AspNetCore.Mvc;
 using Redbean.Firebase;
 
 namespace Redbean.Api.Controllers;
@@ -18,8 +20,8 @@ public class ConfigController : ControllerBase
 
 	private async Task<ActionResult> GetConfigAsync(string path)
 	{
-		var document = FirebaseSetting.Firestore?.Collection("config").Document(path)!;
-		var snapshot = await document.GetSnapshotAsync()!;
+		var document = FirebaseSetting.Firestore?.Collection("config").Document(path);
+		var snapshot = await document?.GetSnapshotAsync();
 		if (snapshot.Exists)
 			return Ok(snapshot.ToDictionary().ToResponse());
 
@@ -31,7 +33,7 @@ public class ConfigController : ControllerBase
 		var key = $"{type}".ToLower() + ".version";
 		
 		var document = FirebaseSetting.Firestore?.Collection("config").Document("app");
-		var snapshotAsync = await document?.GetSnapshotAsync()!;
+		var snapshotAsync = await document?.GetSnapshotAsync();
 		
 		var response = new AppVersionResponse
 		{
