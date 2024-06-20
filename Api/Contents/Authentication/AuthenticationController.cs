@@ -70,7 +70,7 @@ public class AuthenticationController : ControllerBase
 			return BadRequest();
 		}
 		
-		var equalTo = FirebaseSetting.Firestore?.Collection("users").WhereEqualTo("social.id", userId);
+		var equalTo = FirebaseSetting.Firestore?.Collection("users").WhereEqualTo("social.id", userId).Limit(1);
 		var querySnapshot = await equalTo?.GetSnapshotAsync();
 		if (querySnapshot.Count != 0)
 			return Ok(new Dictionary<string, object>
