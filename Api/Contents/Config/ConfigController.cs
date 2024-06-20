@@ -24,7 +24,7 @@ public class ConfigController : ControllerBase
 	
 	private async Task<ActionResult> PostVersionAsync(MobileType type, string version)
 	{
-		var key = $"value.{type}".ToLower() + ".version";
+		var key = $"{type}".ToLower() + ".version";
 		
 		var value = await Redis.GetValue(RedisKey.APP_CONFIG);
 		var beforeVersion = JObject.Parse(value).SelectToken(key).Value<string>();

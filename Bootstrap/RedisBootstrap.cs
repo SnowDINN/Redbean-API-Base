@@ -19,11 +19,11 @@ public class RedisBootstrap : IBootstrap
 		var collection = FirebaseSetting.Firestore?.Collection("config");
 		collection.Document("app").Listen(async _ =>
 		{
-			await Redis.SetValue(RedisKey.APP_CONFIG, _.ToDictionary().ToResponse());
+			await Redis.SetValue(RedisKey.APP_CONFIG, _.ToDictionary());
 		});
 		collection.Document("table").Listen(async _ =>
 		{
-			await Redis.SetValue(RedisKey.TABLE_CONFIG, _.ToDictionary().ToResponse());
+			await Redis.SetValue(RedisKey.TABLE_CONFIG, _.ToDictionary());
 		});
 	}
 
