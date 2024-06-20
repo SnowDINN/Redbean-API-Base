@@ -46,3 +46,8 @@ public class Role
 	public const string Administrator = "Redbean.Boongsin.Administrator";
 	public const string User = "Redbean.Boongsin.User";
 }
+
+public class RedisKey
+{
+	public const string APP_CONFIG = nameof(APP_CONFIG);
+}

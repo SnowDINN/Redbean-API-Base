@@ -59,6 +59,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 FirebaseBootstrap.Setup();
+RedisBootstrap.Setup();
 RxBootstrap.Setup();
 
 var app = builder.Build();
