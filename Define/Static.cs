@@ -14,16 +14,31 @@ public class App
 public class Authorization
 {
 	public static readonly Dictionary<string, TokenResponse> RefreshTokens = new();
-	
-	public static string GetUserId(HttpRequest request)
+
+	public static AuthorizationBody GetAuthorizationBody(HttpRequest request)
 	{
 		var header = request.Headers.Authorization.FirstOrDefault();
 		var headerToken = header?.Replace($"{JwtBearerDefaults.AuthenticationScheme} ", "");
-		var securityToken = new JwtSecurityTokenHandler().ReadJwtToken(headerToken);
+		var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(headerToken);
 
-		var identifier = securityToken.Claims.FirstOrDefault(_ => _.Type == ClaimTypes.NameIdentifier)?.Value;
-		return string.IsNullOrEmpty(identifier) ? string.Empty : identifier.Decrypt();
+		return new AuthorizationBody
+		{
+			UserId = GetClaims(jwtToken, ClaimTypes.NameIdentifier),
+			Version = GetClaims(jwtToken, ClaimTypes.Version)
+		};
 	}
+
+	private static string GetClaims(JwtSecurityToken token, string type)
+	{
+		var value = token.Claims.FirstOrDefault(_ => _.Type == type)?.Value;
+		return string.IsNullOrEmpty(value) ? string.Empty : value.Decrypt();
+	}
+}
+
+public class AuthorizationBody
+{
+	public string UserId { get; set; } = "";
+	public string Version { get; set; } = "";
 }
 
 public class Role

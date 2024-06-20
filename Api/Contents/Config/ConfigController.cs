@@ -29,11 +29,10 @@ public class ConfigController : ControllerBase
 	
 	private async Task<ActionResult> PostVersionAsync(MobileType type, string version)
 	{
-		var key = $"{type}".ToLower() + ".version";
-		
 		var document = FirebaseSetting.Firestore?.Collection("config").Document("app");
 		var snapshotAsync = await document?.GetSnapshotAsync();
 		
+		var key = $"{type}".ToLower() + ".version";
 		var response = new AppVersionResponse
 		{
 			BeforeVersion = snapshotAsync.GetValue<string>(key),

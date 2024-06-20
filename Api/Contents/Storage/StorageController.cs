@@ -11,13 +11,16 @@ namespace Redbean.Api.Controllers;
 public class StorageController : ControllerBase
 {
 	[HttpGet, ApiAuthorize(Role.Administrator, Role.User)]
-	public Task<ActionResult> GetTable(string version) => GetTableAsync($"Table/{version}/");
+	public Task<ActionResult> GetTable() =>
+		GetTableAsync($"Table/{Authorization.GetAuthorizationBody(Request).Version}/");
 	
 	[HttpPost, ApiAuthorize(Role.Administrator)]
-	public Task<ActionResult> PostTableFiles(string version, IFormFile[] tables) => PostFilesAsync($"Table/{version}/", tables);
+	public Task<ActionResult> PostTableFiles(IFormFile[] tables) => 
+		PostFilesAsync($"Table/{Authorization.GetAuthorizationBody(Request).Version}/", tables);
 
 	[HttpPost, ApiAuthorize(Role.Administrator)]
-	public Task<ActionResult> PostBundleFiles(string version, int type, IFormFile[] bundles) => PostFilesAsync($"Bundle/{version}/{(MobileType)type}/", bundles);
+	public Task<ActionResult> PostBundleFiles(int type, IFormFile[] bundles) => 
+		PostFilesAsync($"Bundle/{Authorization.GetAuthorizationBody(Request).Version}/{(MobileType)type}/", bundles);
 
 	private async Task<ActionResult> GetTableAsync(string path)
 	{

@@ -21,7 +21,7 @@ public class AuthenticationController : ControllerBase
 	private const string tokenKey = "token";
 
 	[HttpGet]
-	public async Task<ActionResult> GetToken(string uid)
+	public async Task<ActionResult> GetToken(string uid, string version)
 	{
 		try
 		{
@@ -29,7 +29,7 @@ public class AuthenticationController : ControllerBase
 			var userRecord = await FirebaseAuth.DefaultInstance?.GetUserAsync(userId);
 			
 			if (App.AdministratorKey.Contains(userRecord.Email))
-				return Ok(GetTokenAsync(userId, userRecord.Email).ToResponse());
+				return Ok(GetTokenAsync(userId, userRecord.Email, version).ToResponse());
 		}
 		catch (FirebaseAuthException)
 		{
@@ -40,7 +40,7 @@ public class AuthenticationController : ControllerBase
 	}
 	
 	[HttpGet]
-	public async Task<ActionResult> GetUser(string uid)
+	public async Task<ActionResult> GetUser(string uid, string version)
 	{
 		UserResponse? user;
 		string? email;
@@ -76,7 +76,7 @@ public class AuthenticationController : ControllerBase
 			return Ok(new Dictionary<string, object>
 			{
 				{ userKey, querySnapshot.Documents[0].ToDictionary() },
-				{ tokenKey, GetTokenAsync(userId, email) }
+				{ tokenKey, GetTokenAsync(userId, email, version) }
 			}.ToResponse());
 		
 		var document = FirebaseSetting.Firestore?.Collection("users").Document(userId);
@@ -85,11 +85,11 @@ public class AuthenticationController : ControllerBase
 		return Ok(new Dictionary<string, object>
 		{
 			{ userKey, user.ToResponse() },
-			{ tokenKey, GetTokenAsync(userId, email) }
+			{ tokenKey, GetTokenAsync(userId, email, version) }
 		}.ToResponse());
 	}
 	
-	private TokenResponse GetTokenAsync(string uid, string email)
+	private TokenResponse GetTokenAsync(string uid, string email, string version)
 	{
 		var accessTokenExpire = DateTime.UtcNow.AddSeconds(AccessTokenExpireSecond);
 		var refreshTokenExpire = DateTime.UtcNow.AddSeconds(RefreshTokenExpireSecond);
@@ -98,6 +98,7 @@ public class AuthenticationController : ControllerBase
 		                                 claims: new[]
 		                                 {
 			                                 new Claim(ClaimTypes.NameIdentifier, uid.Encrypt()),
+			                                 new Claim(ClaimTypes.Version, version),
 			                                 new Claim(ClaimTypes.Role, App.AdministratorKey.Contains(email) ? Role.Administrator : Role.User)
 		                                 },
 		                                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(App.SecurityKey), SecurityAlgorithms.HmacSha256));
