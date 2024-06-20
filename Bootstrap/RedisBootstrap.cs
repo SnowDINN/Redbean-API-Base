@@ -3,23 +3,26 @@ using StackExchange.Redis;
 
 namespace Redbean;
 
-public class RedisBootstrap
+public class RedisBootstrap : IBootstrap
 {
-	public static void Setup()
+	public static ConnectionMultiplexer? Redis { get; private set; }
+	
+	public async Task Setup()
 	{
-		Redis.Initialize(ConnectionMultiplexer.Connect("localhost:6379"));
+		Redis = await ConnectionMultiplexer.ConnectAsync("localhost:6379");
+	}
+
+	public async void Dispose()
+	{
+		await Redis.DisposeAsync();
+		
+		GC.SuppressFinalize(this);
 	}
 }
 
 public class Redis
 {
-	private static ConnectionMultiplexer? redis { get; set; }
-	private static IDatabase? db => redis?.GetDatabase();
-
-	public static void Initialize(ConnectionMultiplexer multiplexer)
-	{
-		redis = multiplexer;
-	}
+	private static IDatabase? db => RedisBootstrap.Redis?.GetDatabase();
 	
 	public static string GetValue(string key) => db.StringGet(key);
 

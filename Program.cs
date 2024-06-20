@@ -58,9 +58,7 @@ builder.Services.AddSwaggerGen(options =>
 	});
 });
 
-FirebaseBootstrap.Setup();
-RedisBootstrap.Setup();
-RxBootstrap.Setup();
+await Bootstrap.Setup();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())

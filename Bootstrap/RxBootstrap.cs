@@ -3,11 +3,11 @@ using Redbean.Api;
 
 namespace Redbean;
 
-public class RxBootstrap : IDisposable
+public class RxBootstrap : IBootstrap
 {
 	private static readonly CompositeDisposable disposables = new();
 	
-	public static void Setup()
+	public Task Setup()
 	{
 #region Refresh Token Expired Validation
 
@@ -24,6 +24,8 @@ public class RxBootstrap : IDisposable
 			}).AddTo(disposables);
 
 #endregion
+		
+		return Task.CompletedTask;
 	}
 
 	public void Dispose()

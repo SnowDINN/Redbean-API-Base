@@ -5,9 +5,9 @@ using Newtonsoft.Json.Linq;
 
 namespace Redbean;
 
-public class FirebaseBootstrap : IDisposable
+public class FirebaseBootstrap : IBootstrap
 {
-	public static async void Setup()
+	public async Task Setup()
 	{
 		var environmentPath = $@"{Directory.GetCurrentDirectory()}\Environment\Firebase\DEV.json";
 		Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", environmentPath);
