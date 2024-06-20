@@ -104,13 +104,13 @@ public class AuthenticationController : ControllerBase
 		                                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(App.SecurityKey), SecurityAlgorithms.HmacSha256));
 		var refreshToken = $"{Guid.NewGuid()}".Replace("-", "");
 		
-		App.RefreshTokens[uid] = new TokenResponse
+		Authorization.RefreshTokens[uid] = new TokenResponse
 		{
 			AccessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
 			RefreshToken = refreshToken,
 			AccessTokenExpire = accessTokenExpire,
 			RefreshTokenExpire = refreshTokenExpire,
 		};
-		return App.RefreshTokens[uid];
+		return Authorization.RefreshTokens[uid];
 	}
 }
