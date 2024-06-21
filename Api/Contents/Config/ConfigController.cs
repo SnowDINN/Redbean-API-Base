@@ -1,8 +1,10 @@
-﻿#pragma warning disable CS8602
+﻿#pragma warning disable CS8601
+#pragma warning disable CS8602
+#pragma warning disable CS8604
 
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Redbean.Extension;
 
 namespace Redbean.Api.Controllers;
 
@@ -12,11 +14,11 @@ public class ConfigController : ControllerBase
 {
 	[HttpGet]
 	public async Task<IActionResult> GetAppConfig() =>
-		Content(await Redis.GetValue(RedisKey.APP_CONFIG), ContentType.Json);
+		Content(await Redis.GetValueAsync(RedisKey.APP_CONFIG), ContentType.Json);
 	
 	[HttpGet, ApiAuthorize(Role.Administrator)]
 	public async Task<IActionResult> GetTableConfig() => 
-		Content(await Redis.GetValue(RedisKey.TABLE_CONFIG), ContentType.Json);
+		Content(await Redis.GetValueAsync(RedisKey.TABLE_CONFIG), ContentType.Json);
 	
 	[HttpPost, ApiAuthorize(Role.Administrator)]
 	public async Task<ActionResult> PostAppVersion(string version, int type) => 
@@ -24,19 +26,27 @@ public class ConfigController : ControllerBase
 	
 	private async Task<ActionResult> PostVersionAsync(MobileType type, string version)
 	{
-		var key = $"{type}".ToLower() + ".version";
-		
-		var value = await Redis.GetValue(RedisKey.APP_CONFIG);
-		var beforeVersion = JObject.Parse(value).SelectToken(key).Value<string>();
-		
-		var response = new AppVersionResponse
+		var redis = await Redis.GetValueAsync(RedisKey.APP_CONFIG);
+		var appConfigResponse = redis.ToConvert<AppConfigResponse>();
+		var appVersionResponse = new AppVersionResponse
 		{
-			BeforeVersion = beforeVersion,
 			AfterVersion = version
 		};
 
-		await FirebaseSetting.Firestore?.Collection("config").Document("app").UpdateAsync(key, version);
+		switch (type)
+		{
+			case MobileType.Android:
+				appVersionResponse.BeforeVersion = appConfigResponse.Android.Version;
+				appConfigResponse.Android.Version = version;
+				break;
+			
+			case MobileType.iOS:
+				appVersionResponse.BeforeVersion = appConfigResponse.iOS.Version;
+				appConfigResponse.iOS.Version = version;
+				break;
+		}
 		
-		return Ok(response.ToResponse());
+		await FirebaseSetting.Firestore?.Collection("config").Document("app").SetAsync(appConfigResponse.ToDocument());
+		return Ok(appVersionResponse.ToResponse());
 	}
 }

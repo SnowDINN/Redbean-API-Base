@@ -1,8 +1,9 @@
 ﻿#pragma warning disable CS8602
 #pragma warning disable CS8603
 
+using Google.Cloud.Firestore;
 using Newtonsoft.Json;
-using Redbean.Api;
+using Redbean.Extension;
 using StackExchange.Redis;
 using RedisKey = Redbean.Api.RedisKey;
 
@@ -10,6 +11,7 @@ namespace Redbean;
 
 public class RedisBootstrap : IBootstrap
 {
+	private readonly List<FirestoreChangeListener> listeners = [];
 	public int ExecutionOrder => 20;
 
 	public async Task Setup()
@@ -19,17 +21,23 @@ public class RedisBootstrap : IBootstrap
 		var collection = FirebaseSetting.Firestore?.Collection("config");
 		collection.Document("app").Listen(async _ =>
 		{
-			await Redis.SetValue(RedisKey.APP_CONFIG, _.ToDictionary());
-		});
+			await Redis.SetValueAsync(RedisKey.APP_CONFIG, _.ToDictionary());
+		}).AddListener(listeners);
+		
 		collection.Document("table").Listen(async _ =>
 		{
-			await Redis.SetValue(RedisKey.TABLE_CONFIG, _.ToDictionary());
-		});
+			await Redis.SetValueAsync(RedisKey.TABLE_CONFIG, _.ToDictionary());
+		}).AddListener(listeners);
 	}
 
 	public async void Dispose()
 	{
 		await Redis.Multiplexer.DisposeAsync();
+		
+		foreach (var listener in listeners)
+			await listener.StopAsync();
+		
+		listeners.Clear();
 		
 		GC.SuppressFinalize(this);
 	}
@@ -45,7 +53,9 @@ public class Redis
 		Multiplexer = await ConnectionMultiplexer.ConnectAsync("localhost:6379");
 	}
 	
-	public static async Task<string> GetValue(string key) => await db?.StringGetAsync(key);
+	public static async Task<string> GetValueAsync(string key) => await db?.StringGetAsync(key);
 
-	public static async Task<string> SetValue(string key, object value) => await db?.StringGetSetAsync(key, JsonConvert.SerializeObject(value));
+	public static async Task SetValueAsync(string key, object value) => await db?.StringSetAsync(key, JsonConvert.SerializeObject(value));
+	
+	public static async Task SetValueAsync(string key, object value, TimeSpan expired) => await db?.StringSetAsync(key, JsonConvert.SerializeObject(value), expired);
 }

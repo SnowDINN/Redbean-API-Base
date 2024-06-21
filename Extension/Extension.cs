@@ -4,14 +4,24 @@
 using Google.Cloud.Firestore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Redbean.Api;
 
 namespace Redbean.Extension;
 
 public static class Extension
 {
-	public static T? ToConvert<T>(this DocumentSnapshot snapshot) => 
-		JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(snapshot.ToDictionary()));
+#region MyRegion
 
+	public static T ToConvert<T>(this string value) where T : IResponse =>
+		JsonConvert.DeserializeObject<T>(value);
+
+#endregion
+	
+#region Firestore Extension
+
+	public static void AddListener(this FirestoreChangeListener listener, List<FirestoreChangeListener> list) =>
+		list.Add(listener);
+	
 	public static object ToDocument<T>(this T value) =>
 		JObjectToDictionary(JObject.Parse(JsonConvert.SerializeObject(value)));
 	
@@ -39,4 +49,6 @@ public static class Extension
 				return (token as JValue).Value;
 		}
 	}
+
+#endregion
 }
