@@ -1,6 +1,4 @@
-﻿#pragma warning disable CS8602
-
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Web;
 using FirebaseAdmin.Auth;
@@ -44,8 +42,8 @@ public class AuthenticationController : ControllerBase
 	{
 		var userId = HttpUtility.UrlDecode(uid.Decrypt());
 
-		TokenResponse? token;
-		UserResponse? user;
+		TokenResponse token;
+		UserResponse user;
 		
 		try
 		{

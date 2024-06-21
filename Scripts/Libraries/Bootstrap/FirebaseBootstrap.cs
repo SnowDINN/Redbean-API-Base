@@ -36,9 +36,9 @@ public class FirebaseBootstrap : IBootstrap
 
 public class FirebaseSetting
 {
-	public static string? Id { get; set; }
-	public static string? StorageBucket { get; set; }
+	public static string Id { get; set; }
+	public static string StorageBucket { get; set; }
 	
-	public static FirestoreDb? Firestore { get; set; }
-	public static StorageClient? Storage { get; set; }
+	public static FirestoreDb Firestore { get; set; }
+	public static StorageClient Storage { get; set; }
 }

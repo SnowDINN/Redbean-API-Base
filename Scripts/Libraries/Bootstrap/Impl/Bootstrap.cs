@@ -1,7 +1,4 @@
-﻿#pragma warning disable CS8602
-#pragma warning disable CS8604
-
-namespace Redbean;
+﻿namespace Redbean;
 
 public class Bootstrap
 {

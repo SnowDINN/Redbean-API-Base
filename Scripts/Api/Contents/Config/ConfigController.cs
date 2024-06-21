@@ -1,8 +1,4 @@
-﻿#pragma warning disable CS8601
-#pragma warning disable CS8602
-#pragma warning disable CS8604
-
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Redbean.Extension;
 
 namespace Redbean.Api.Controllers;

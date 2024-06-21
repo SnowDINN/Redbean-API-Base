@@ -1,7 +1,4 @@
-﻿#pragma warning disable CS8602
-#pragma warning disable CS8603
-
-using Google.Cloud.Firestore;
+﻿using Google.Cloud.Firestore;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -50,7 +47,7 @@ public static class Extension
 	public static object ToDocument<T>(this T value) =>
 		JObjectToDictionary(JObject.Parse(JsonConvert.SerializeObject(value)));
 	
-	private static Dictionary<string, object> JObjectToDictionary(JObject? obj)
+	private static Dictionary<string, object> JObjectToDictionary(JObject obj)
 	{
 		var result = new Dictionary<string, object>();
 
@@ -60,7 +57,7 @@ public static class Extension
 		return result;
 	}
 
-	private static object JTokenToObject(JToken? token)
+	private static object JTokenToObject(JToken token)
 	{
 		switch (token.Type)
 		{

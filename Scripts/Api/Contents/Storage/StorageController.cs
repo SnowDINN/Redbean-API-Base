@@ -1,6 +1,4 @@
-﻿#pragma warning disable CS8602
-
-using System.Text;
+﻿using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Redbean.Extension;
 using Object = Google.Apis.Storage.v1.Data.Object;

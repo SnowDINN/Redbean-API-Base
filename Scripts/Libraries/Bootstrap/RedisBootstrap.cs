@@ -1,8 +1,4 @@
-﻿#pragma warning disable CS8602
-#pragma warning disable CS8603
-#pragma warning disable CS8604
-
-using Google.Cloud.Firestore;
+﻿using Google.Cloud.Firestore;
 using Newtonsoft.Json;
 using Redbean.Api;
 using Redbean.Extension;
@@ -47,12 +43,12 @@ public class RedisBootstrap : IBootstrap
 
 public class Redis
 {
-	public static ConnectionMultiplexer? Multiplexer { get; private set; }
-	private static IDatabase? db => Multiplexer?.GetDatabase();
+	public static ConnectionMultiplexer Multiplexer { get; private set; }
+	private static IDatabase db => Multiplexer?.GetDatabase();
 
 	public static async Task Initialize()
 	{
-		Multiplexer = await ConnectionMultiplexer.ConnectAsync("localhost:6379");
+		Multiplexer = await ConnectionMultiplexer.ConnectAsync("127.0.0.1:6379");
 	}
 
 	public static async Task<T> GetValueAsync<T>(string key) where T : IResponse =>
