@@ -19,7 +19,7 @@ public class AuthenticationController : ControllerBase
 	private const string tokenKey = "token";
 
 	[HttpGet]
-	public async Task<ActionResult> GetToken(string uid, string version)
+	public async Task<IActionResult> GetToken(string uid, string version)
 	{
 		try
 		{
@@ -38,7 +38,7 @@ public class AuthenticationController : ControllerBase
 	}
 	
 	[HttpGet]
-	public async Task<ActionResult> GetUser(string uid, string version)
+	public async Task<IActionResult> GetUser(string uid, string version)
 	{
 		var userId = HttpUtility.UrlDecode(uid.Decrypt());
 

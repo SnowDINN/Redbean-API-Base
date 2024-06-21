@@ -10,18 +10,18 @@ namespace Redbean.Api.Controllers;
 public class StorageController : ControllerBase
 {
 	[HttpGet, ApiAuthorize(Role.Administrator, Role.User)]
-	public Task<ActionResult> GetTable() =>
+	public Task<IActionResult> GetTable() =>
 		GetTableAsync($"Table/{Authorization.GetAuthorizationBody(Request).Version}/");
 	
 	[HttpPost, ApiAuthorize(Role.Administrator)]
-	public Task<ActionResult> PostTableFiles(IFormFile[] tables) => 
+	public Task<IActionResult> PostTableFiles(IFormFile[] tables) => 
 		PostFilesAsync($"Table/{Authorization.GetAuthorizationBody(Request).Version}/", tables);
 
 	[HttpPost, ApiAuthorize(Role.Administrator)]
-	public Task<ActionResult> PostBundleFiles(int type, IFormFile[] bundles) => 
+	public Task<IActionResult> PostBundleFiles(int type, IFormFile[] bundles) => 
 		PostFilesAsync($"Bundle/{Authorization.GetAuthorizationBody(Request).Version}/{(MobileType)type}/", bundles);
 
-	private async Task<ActionResult> GetTableAsync(string path)
+	private async Task<IActionResult> GetTableAsync(string path)
 	{
 		var dictionary = new Dictionary<string, object>();
 		
@@ -40,7 +40,7 @@ public class StorageController : ControllerBase
 		return dictionary.ToResponse();
 	}
 
-	private async Task<ActionResult> PostFilesAsync(string path, IEnumerable<IFormFile> files)
+	private async Task<IActionResult> PostFilesAsync(string path, IEnumerable<IFormFile> files)
 	{
 		await DeleteFiles(path);
 
