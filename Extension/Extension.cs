@@ -42,7 +42,7 @@ public static class Extension
 
 #endregion
 	
-#region Firestore Extension
+#region Firestore
 
 	public static void AddListener(this FirestoreChangeListener listener, List<FirestoreChangeListener> list) =>
 		list.Add(listener);

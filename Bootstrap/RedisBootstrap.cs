@@ -1,8 +1,10 @@
 ﻿#pragma warning disable CS8602
 #pragma warning disable CS8603
+#pragma warning disable CS8604
 
 using Google.Cloud.Firestore;
 using Newtonsoft.Json;
+using Redbean.Api;
 using Redbean.Extension;
 using StackExchange.Redis;
 using RedisKey = Redbean.Api.RedisKey;
@@ -52,10 +54,13 @@ public class Redis
 	{
 		Multiplexer = await ConnectionMultiplexer.ConnectAsync("localhost:6379");
 	}
-	
-	public static async Task<string> GetValueAsync(string key) => await db?.StringGetAsync(key);
 
-	public static async Task SetValueAsync(string key, object value) => await db?.StringSetAsync(key, JsonConvert.SerializeObject(value));
+	public static async Task<T> GetValueAsync<T>(string key) where T : IResponse =>
+		JsonConvert.DeserializeObject<T>(await db?.StringGetAsync(key));
+
+	public static async Task SetValueAsync(string key, object value) => 
+		await db?.StringSetAsync(key, JsonConvert.SerializeObject(value));
 	
-	public static async Task SetValueAsync(string key, object value, TimeSpan expired) => await db?.StringSetAsync(key, JsonConvert.SerializeObject(value), expired);
+	public static async Task SetValueAsync(string key, object value, TimeSpan expired) => 
+		await db?.StringSetAsync(key, JsonConvert.SerializeObject(value), expired);
 }

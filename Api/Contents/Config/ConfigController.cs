@@ -2,6 +2,7 @@
 #pragma warning disable CS8602
 #pragma warning disable CS8604
 
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Redbean.Extension;
 
@@ -25,16 +26,13 @@ public class ConfigController : ControllerBase
 
 	private async Task<IActionResult> GetConfigAsync(string key)
 	{
-		var redis = await Redis.GetValueAsync(key);
-		var appConfigResponse = redis.ToConvert<AppConfigResponse>();
-
+		var appConfigResponse = await Redis.GetValueAsync<AppConfigResponse>(key);
 		return appConfigResponse.ToResponse();
 	}
 	
 	private async Task<IActionResult> PostVersionAsync(MobileType type, string version)
 	{
-		var redis = await Redis.GetValueAsync(RedisKey.APP_CONFIG);
-		var appConfigResponse = redis.ToConvert<AppConfigResponse>();
+		var appConfigResponse = await Redis.GetValueAsync<AppConfigResponse>(RedisKey.APP_CONFIG);
 		var appVersionResponse = new AppVersionResponse
 		{
 			AfterVersion = version
