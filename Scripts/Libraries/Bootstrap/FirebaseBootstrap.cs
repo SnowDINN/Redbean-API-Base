@@ -11,7 +11,7 @@ public class FirebaseBootstrap : IBootstrap
 
 	public async Task Setup()
 	{
-		var environmentPath = $@"{Directory.GetCurrentDirectory()}\Environment\Firebase\DEV.json";
+		var environmentPath = $@"{Directory.GetCurrentDirectory()}\Properties\Firebase\DEV.json";
 		Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", environmentPath);
 
 		using var reader = new StreamReader(environmentPath);
