@@ -2,7 +2,6 @@
 #pragma warning disable CS8602
 #pragma warning disable CS8604
 
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Redbean.Extension;
 
