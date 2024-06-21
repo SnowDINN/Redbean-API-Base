@@ -29,7 +29,7 @@ public class AuthenticationController : ControllerBase
 			var userRecord = await FirebaseAuth.DefaultInstance?.GetUserAsync(userId);
 			
 			if (App.AdministratorKey.Contains(userRecord.Email))
-				return Ok(GetTokenAsync(userId, userRecord.Email, version).ToResponse());
+				return GetTokenAsync(userId, userRecord.Email, version).ToResponse();
 		}
 		catch (FirebaseAuthException)
 		{
@@ -42,10 +42,10 @@ public class AuthenticationController : ControllerBase
 	[HttpGet]
 	public async Task<ActionResult> GetUser(string uid, string version)
 	{
-		UserResponse? user;
-		string? email;
-		
 		var userId = HttpUtility.UrlDecode(uid.Decrypt());
+
+		TokenResponse? token;
+		UserResponse? user;
 		
 		try
 		{
@@ -62,8 +62,8 @@ public class AuthenticationController : ControllerBase
 					Nickname = userRecord.ProviderData[0].DisplayName
 				}
 			};
-
-			email = userRecord.Email;
+			
+			token = GetTokenAsync(userId, userRecord.Email, version);
 		}
 		catch (FirebaseAuthException)
 		{
@@ -73,20 +73,25 @@ public class AuthenticationController : ControllerBase
 		var equalTo = FirebaseSetting.Firestore?.Collection("users").WhereEqualTo("social.id", userId).Limit(1);
 		var querySnapshot = await equalTo?.GetSnapshotAsync();
 		if (querySnapshot.Count != 0)
-			return Ok(new Dictionary<string, object>
-			{
-				{ userKey, querySnapshot.Documents[0].ToDictionary() },
-				{ tokenKey, GetTokenAsync(userId, email, version) }
-			}.ToResponse());
-		
-		var document = FirebaseSetting.Firestore?.Collection("users").Document(userId);
-		await document?.SetAsync(user.ToDocument());
+		{
+			user = querySnapshot.Documents[0].ToDictionary().ToConvert<UserResponse>();
+			await Redis.SetValueAsync(userId, user, TimeSpan.FromDays(1));
 
-		return Ok(new Dictionary<string, object>
+			return new Dictionary<string, object>
+			{
+				{ userKey, user },
+				{ tokenKey, token }
+			}.ToResponse();
+		}
+		
+		await FirebaseSetting.Firestore?.Collection("users").Document(userId)?.SetAsync(user.ToDocument());
+		await Redis.SetValueAsync(userId, user, TimeSpan.FromDays(1));
+
+		return new Dictionary<string, object>
 		{
 			{ userKey, user.ToResponse() },
-			{ tokenKey, GetTokenAsync(userId, email, version) }
-		}.ToResponse());
+			{ tokenKey, token }
+		}.ToResponse();
 	}
 	
 	private TokenResponse GetTokenAsync(string uid, string email, string version)

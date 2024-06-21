@@ -2,6 +2,7 @@
 
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
+using Redbean.Extension;
 using Object = Google.Apis.Storage.v1.Data.Object;
 
 namespace Redbean.Api.Controllers;
@@ -38,7 +39,7 @@ public class StorageController : ControllerBase
 			dictionary.Add(tableName, Encoding.UTF8.GetString(memoryStream.ToArray()));
 		}
 
-		return Ok(dictionary.ToResponse());
+		return dictionary.ToResponse();
 	}
 
 	private async Task<ActionResult> PostFilesAsync(string path, IEnumerable<IFormFile> files)
@@ -57,7 +58,7 @@ public class StorageController : ControllerBase
 			await FirebaseSetting.Storage?.UploadObjectAsync(obj, file.OpenReadStream());	
 		}
 		
-		return Ok(files.Select(_ => _.FileName).ToList().ToResponse());
+		return files.Select(_ => _.FileName).ToResponse();
 	}
 	
 	private async Task DeleteFiles(string path)

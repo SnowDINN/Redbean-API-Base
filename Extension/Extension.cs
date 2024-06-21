@@ -2,6 +2,7 @@
 #pragma warning disable CS8603
 
 using Google.Cloud.Firestore;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Redbean.Api;
@@ -10,10 +11,34 @@ namespace Redbean.Extension;
 
 public static class Extension
 {
-#region MyRegion
+#region Common
 
+	public static T ToConvert<T>(this IDictionary<string, object> value) where T : IResponse =>
+		JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(value));
+	
 	public static T ToConvert<T>(this string value) where T : IResponse =>
 		JsonConvert.DeserializeObject<T>(value);
+
+#endregion
+
+#region Response
+
+	public static ContentResult ToResponse(this string message, ApiErrorType type = 0) => Response.Return((int)type, message).ToResult();
+
+	public static ContentResult ToResponse<T>(this IEnumerable<T> message, ApiErrorType type = 0) => Response.Return((int)type, message).ToResult();
+
+	public static ContentResult ToResponse(this IDictionary<string, object> snapshot, ApiErrorType type = 0) => Response.Return((int)type, snapshot).ToResult();
+
+	public static ContentResult ToResponse<T>(this T value, ApiErrorType type = 0) where T : IResponse => Response.Return((int)type, value).ToResult();
+		
+	private static ContentResult ToResult(this Response response)
+	{
+		return new ContentResult
+		{
+			Content = JsonConvert.SerializeObject(response),
+			ContentType = "application/json"
+		};
+	}
 
 #endregion
 	

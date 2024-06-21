@@ -3,7 +3,6 @@
 #pragma warning disable CS8604
 
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
 using Redbean.Extension;
 
 namespace Redbean.Api.Controllers;
@@ -14,17 +13,25 @@ public class ConfigController : ControllerBase
 {
 	[HttpGet]
 	public async Task<IActionResult> GetAppConfig() =>
-		Content(await Redis.GetValueAsync(RedisKey.APP_CONFIG), ContentType.Json);
+		await GetConfigAsync(RedisKey.APP_CONFIG);
 	
 	[HttpGet, ApiAuthorize(Role.Administrator)]
 	public async Task<IActionResult> GetTableConfig() => 
-		Content(await Redis.GetValueAsync(RedisKey.TABLE_CONFIG), ContentType.Json);
+		await GetConfigAsync(RedisKey.TABLE_CONFIG);
 	
 	[HttpPost, ApiAuthorize(Role.Administrator)]
-	public async Task<ActionResult> PostAppVersion(string version, int type) => 
+	public async Task<IActionResult> PostAppVersion(string version, int type) => 
 		await PostVersionAsync((MobileType)type, version);
+
+	private async Task<IActionResult> GetConfigAsync(string key)
+	{
+		var redis = await Redis.GetValueAsync(key);
+		var appConfigResponse = redis.ToConvert<AppConfigResponse>();
+
+		return appConfigResponse.ToResponse();
+	}
 	
-	private async Task<ActionResult> PostVersionAsync(MobileType type, string version)
+	private async Task<IActionResult> PostVersionAsync(MobileType type, string version)
 	{
 		var redis = await Redis.GetValueAsync(RedisKey.APP_CONFIG);
 		var appConfigResponse = redis.ToConvert<AppConfigResponse>();
@@ -47,6 +54,6 @@ public class ConfigController : ControllerBase
 		}
 		
 		await FirebaseSetting.Firestore?.Collection("config").Document("app").SetAsync(appConfigResponse.ToDocument());
-		return Ok(appVersionResponse.ToResponse());
+		return appVersionResponse.ToResponse();
 	}
 }

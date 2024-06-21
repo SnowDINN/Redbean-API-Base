@@ -41,11 +41,6 @@ public class AuthorizationBody
 	public string Version { get; set; } = "";
 }
 
-public class ContentType
-{
-	public const string Json = "application/json";
-}
-
 public class Role
 {
 	public const string Administrator = "Redbean.Boongsin.Administrator";
