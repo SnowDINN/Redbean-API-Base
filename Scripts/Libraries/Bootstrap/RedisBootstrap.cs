@@ -48,7 +48,7 @@ public class Redis
 
 	public static async Task Initialize()
 	{
-		Multiplexer = await ConnectionMultiplexer.ConnectAsync("127.0.0.1:6379");
+		Multiplexer = await ConnectionMultiplexer.ConnectAsync("localhost");
 	}
 
 	public static async Task<T> GetValueAsync<T>(string key) where T : IResponse =>
