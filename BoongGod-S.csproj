@@ -28,4 +28,13 @@
       <_ContentIncludedByDefault Remove="Environment\Firebase\DEV.json" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Update="Properties\Appsettings\appsettings.json">
+        <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Properties\Appsettings\appsettings.Development.json">
+        <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>
