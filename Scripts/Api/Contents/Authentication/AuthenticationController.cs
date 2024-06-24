@@ -18,6 +18,9 @@ public class AuthenticationController : ControllerBase
 	private const string userKey = "user";
 	private const string tokenKey = "token";
 
+	/// <summary>
+	/// 에디터 전용 토큰 발급
+	/// </summary>
 	[HttpGet]
 	public async Task<IActionResult> GetToken(string uid, string version)
 	{
@@ -37,6 +40,9 @@ public class AuthenticationController : ControllerBase
 		return BadRequest();
 	}
 	
+	/// <summary>
+	/// 사용자 로그인 및 토큰 발급
+	/// </summary>
 	[HttpGet]
 	public async Task<IActionResult> GetUser(string uid, string version)
 	{
@@ -45,6 +51,7 @@ public class AuthenticationController : ControllerBase
 		TokenResponse token;
 		UserResponse user;
 		
+		// 사용자 유효성 검사
 		try
 		{
 			var userRecord = await FirebaseAuth.DefaultInstance?.GetUserAsync(userId);
@@ -68,13 +75,14 @@ public class AuthenticationController : ControllerBase
 			return BadRequest();
 		}
 		
+		// 사용자 데이터베이스 탐색 쿼리
 		var equalTo = FirebaseSetting.Firestore?.Collection("users").WhereEqualTo("social.id", userId).Limit(1);
 		var querySnapshot = await equalTo?.GetSnapshotAsync();
 		if (querySnapshot.Count != 0)
 		{
 			user = querySnapshot.Documents[0].ToDictionary().ToConvert<UserResponse>();
-			await Redis.SetValueAsync(userId, user, TimeSpan.FromDays(1));
-
+			await Redis.SetUserAsync(userId, user);
+			
 			return new Dictionary<string, object>
 			{
 				{ userKey, user },
@@ -82,9 +90,10 @@ public class AuthenticationController : ControllerBase
 			}.ToResponse();
 		}
 		
+		// 새로운 사용자 데이터 저장
 		await FirebaseSetting.Firestore?.Collection("users").Document(userId)?.SetAsync(user.ToDocument());
-		await Redis.SetValueAsync(userId, user, TimeSpan.FromDays(1));
-
+		await Redis.SetUserAsync(userId, user);
+		
 		return new Dictionary<string, object>
 		{
 			{ userKey, user.ToResponse() },

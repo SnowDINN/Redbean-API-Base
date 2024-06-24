@@ -10,9 +10,15 @@ public static class Extension
 {
 #region Common
 
+	/// <summary>
+	/// 클래스 변환
+	/// </summary>
 	public static T ToConvert<T>(this IDictionary<string, object> value) where T : IResponse =>
 		JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(value));
 	
+	/// <summary>
+	/// 클래스 변환
+	/// </summary>
 	public static T ToConvert<T>(this string value) where T : IResponse =>
 		JsonConvert.DeserializeObject<T>(value);
 
@@ -20,12 +26,24 @@ public static class Extension
 
 #region Response
 
+	/// <summary>
+	/// API 데이터 반환
+	/// </summary>
 	public static ContentResult ToResponse(this string message, ApiErrorType type = 0) => Response.Return((int)type, message).ToResult();
 
+	/// <summary>
+	/// API 데이터 반환
+	/// </summary>
 	public static ContentResult ToResponse<T>(this IEnumerable<T> message, ApiErrorType type = 0) => Response.Return((int)type, message).ToResult();
 
+	/// <summary>
+	/// API 데이터 반환
+	/// </summary>
 	public static ContentResult ToResponse(this IDictionary<string, object> snapshot, ApiErrorType type = 0) => Response.Return((int)type, snapshot).ToResult();
 
+	/// <summary>
+	/// API 데이터 반환
+	/// </summary>
 	public static ContentResult ToResponse<T>(this T value, ApiErrorType type = 0) where T : IResponse => Response.Return((int)type, value).ToResult();
 		
 	private static ContentResult ToResult(this Response response)
@@ -41,9 +59,15 @@ public static class Extension
 	
 #region Firestore
 
-	public static void AddListener(this FirestoreChangeListener listener, List<FirestoreChangeListener> list) =>
+	/// <summary>
+	/// Firestore 리스너 구독
+	/// </summary>
+	public static void Subscribe(this FirestoreChangeListener listener, List<FirestoreChangeListener> list) =>
 		list.Add(listener);
 	
+	/// <summary>
+	/// Firestore 데이터화
+	/// </summary>
 	public static object ToDocument<T>(this T value) =>
 		JObjectToDictionary(JObject.Parse(JsonConvert.SerializeObject(value)));
 	

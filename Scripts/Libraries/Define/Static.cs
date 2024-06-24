@@ -15,6 +15,9 @@ public class Authorization
 {
 	public static readonly Dictionary<string, TokenResponse> RefreshTokens = new();
 
+	/// <summary>
+	/// JWT 토큰 데이터
+	/// </summary>
 	public static AuthorizationBody GetAuthorizationBody(HttpRequest request)
 	{
 		var header = request.Headers.Authorization.FirstOrDefault();

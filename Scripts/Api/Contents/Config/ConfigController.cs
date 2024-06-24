@@ -7,14 +7,23 @@ namespace Redbean.Api.Controllers;
 [Route("[controller]/[action]")]
 public class ConfigController : ControllerBase
 {
+	/// <summary>
+	/// 앱 구성 데이터
+	/// </summary>
 	[HttpGet]
 	public async Task<IActionResult> GetAppConfig() =>
 		await GetConfigAsync(RedisKey.APP_CONFIG);
 	
+	/// <summary>
+	/// 테이블 구성 데이터
+	/// </summary>
 	[HttpGet, ApiAuthorize(Role.Administrator)]
 	public async Task<IActionResult> GetTableConfig() => 
 		await GetConfigAsync(RedisKey.TABLE_CONFIG);
 	
+	/// <summary>
+	/// 앱 업데이트 버전 변경
+	/// </summary>
 	[HttpPost, ApiAuthorize(Role.Administrator)]
 	public async Task<IActionResult> PostAppVersion(string version, int type) => 
 		await PostVersionAsync((MobileType)type, version);
