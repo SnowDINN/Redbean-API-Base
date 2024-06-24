@@ -41,4 +41,9 @@ public class FirebaseSetting
 	
 	public static FirestoreDb Firestore { get; set; }
 	public static StorageClient Storage { get; set; }
+
+	public static CollectionReference UserCollection => Firestore.Collection("users");
+
+	public static DocumentReference AppConfigDocument => Firestore.Collection("config").Document("app");
+	public static DocumentReference TableConfigDocument => Firestore.Collection("config").Document("table");
 }

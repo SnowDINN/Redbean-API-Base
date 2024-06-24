@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Redbean.Extension;
+using Redbean.MVP.Content;
 
 namespace Redbean.Api.Controllers;
 
@@ -8,18 +9,11 @@ namespace Redbean.Api.Controllers;
 public class ConfigController : ControllerBase
 {
 	/// <summary>
-	/// 앱 구성 데이터
-	/// </summary>
-	[HttpGet]
-	public async Task<IActionResult> GetAppConfig() =>
-		await GetConfigAsync(RedisKey.APP_CONFIG);
-	
-	/// <summary>
 	/// 테이블 구성 데이터
 	/// </summary>
 	[HttpGet, ApiAuthorize(Role.Administrator)]
 	public async Task<IActionResult> GetTableConfig() => 
-		await GetConfigAsync(RedisKey.TABLE_CONFIG);
+		await GetTableConfigAsync();
 	
 	/// <summary>
 	/// 앱 업데이트 버전 변경
@@ -28,9 +22,9 @@ public class ConfigController : ControllerBase
 	public async Task<IActionResult> PostAppVersion(string version, int type) => 
 		await PostVersionAsync((MobileType)type, version);
 
-	private async Task<IActionResult> GetConfigAsync(string key)
+	private async Task<IActionResult> GetTableConfigAsync()
 	{
-		var appConfigResponse = await Redis.GetValueAsync<AppConfigResponse>(key);
+		var appConfigResponse = await Redis.GetValueAsync<TableConfigResponse>(RedisKey.TABLE_CONFIG);
 		return appConfigResponse.ToResponse();
 	}
 	
@@ -55,7 +49,7 @@ public class ConfigController : ControllerBase
 				break;
 		}
 		
-		await FirebaseSetting.Firestore?.Collection("config").Document("app").SetAsync(appConfigResponse.ToDocument());
+		await FirebaseSetting.AppConfigDocument?.SetAsync(appConfigResponse.ToDocument());
 		return appVersionResponse.ToResponse();
 	}
 }

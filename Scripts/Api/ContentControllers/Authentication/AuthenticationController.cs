@@ -76,12 +76,12 @@ public class AuthenticationController : ControllerBase
 		}
 		
 		// 사용자 데이터베이스 탐색 쿼리
-		var equalTo = FirebaseSetting.Firestore?.Collection("users").WhereEqualTo("social.id", userId).Limit(1);
+		var equalTo = FirebaseSetting.UserCollection?.WhereEqualTo("social.id", userId)?.Limit(1);
 		var querySnapshot = await equalTo?.GetSnapshotAsync();
 		if (querySnapshot.Count != 0)
 		{
 			user = querySnapshot.Documents[0].ToDictionary().ToConvert<UserResponse>();
-			await Redis.SetUserAsync(userId, user);
+			await Redis.SetUserAsync(user);
 			
 			return new Dictionary<string, object>
 			{
@@ -91,8 +91,8 @@ public class AuthenticationController : ControllerBase
 		}
 		
 		// 새로운 사용자 데이터 저장
-		await FirebaseSetting.Firestore?.Collection("users").Document(userId)?.SetAsync(user.ToDocument());
-		await Redis.SetUserAsync(userId, user);
+		await FirebaseSetting.UserCollection?.Document(userId)?.SetAsync(user.ToDocument());
+		await Redis.SetUserAsync(user);
 		
 		return new Dictionary<string, object>
 		{

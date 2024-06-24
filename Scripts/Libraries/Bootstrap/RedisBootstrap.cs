@@ -16,13 +16,12 @@ public class RedisBootstrap : IBootstrap
 	{
 		await Redis.Initialize();
 		
-		var collection = FirebaseSetting.Firestore?.Collection("config");
-		collection.Document("app").Listen(async _ =>
+		FirebaseSetting.AppConfigDocument.Listen(async _ =>
 		{
 			await Redis.SetValueAsync(RedisKey.APP_CONFIG, _.ToDictionary());
 		}).Subscribe(listeners);
 		
-		collection.Document("table").Listen(async _ =>
+		FirebaseSetting.TableConfigDocument.Listen(async _ =>
 		{
 			await Redis.SetValueAsync(RedisKey.TABLE_CONFIG, _.ToDictionary());
 		}).Subscribe(listeners);
@@ -71,12 +70,12 @@ public class Redis
 		var redis = await db?.StringGetAsync(userId);
 		if (string.IsNullOrEmpty(redis))
 		{
-			var equalTo = FirebaseSetting.Firestore?.Collection("users").WhereEqualTo("social.id", userId).Limit(1);
+			var equalTo = FirebaseSetting.UserCollection?.WhereEqualTo("social.id", userId)?.Limit(1);
 			var querySnapshot = await equalTo?.GetSnapshotAsync();
 			if (querySnapshot.Count != 0)
 			{
 				var user = querySnapshot.Documents[0].ToDictionary().ToConvert<UserResponse>();
-				await SetUserAsync(userId, user);
+				await SetUserAsync(user);
 			}
 		}
 		
@@ -86,6 +85,6 @@ public class Redis
 	/// <summary>
 	/// Redis 유저 데이터 설정
 	/// </summary>
-	public static async Task SetUserAsync(string userId, object value) => 
-		await db?.StringSetAsync(userId, JsonConvert.SerializeObject(value), TimeSpan.FromDays(1));
+	public static async Task SetUserAsync(UserResponse user) => 
+		await db?.StringSetAsync(user.Social.Id, JsonConvert.SerializeObject(user), TimeSpan.FromDays(1));
 }

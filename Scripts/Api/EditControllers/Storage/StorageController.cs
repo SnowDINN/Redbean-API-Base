@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Redbean.Extension;
 using Object = Google.Apis.Storage.v1.Data.Object;
 
@@ -9,13 +8,6 @@ namespace Redbean.Api.Controllers;
 [Route("[controller]/[action]")]
 public class StorageController : ControllerBase
 {
-	/// <summary>
-	/// 테이블 데이터
-	/// </summary>
-	[HttpGet, ApiAuthorize(Role.Administrator, Role.User)]
-	public Task<IActionResult> GetTable() =>
-		GetTableAsync($"Table/{Authorization.GetAuthorizationBody(Request).Version}/");
-	
 	/// <summary>
 	/// 테이블 데이터 업데이트
 	/// </summary>
@@ -29,25 +21,6 @@ public class StorageController : ControllerBase
 	[HttpPost, ApiAuthorize(Role.Administrator)]
 	public Task<IActionResult> PostBundleFiles(int type, IFormFile[] bundles) => 
 		PostFilesAsync($"Bundle/{Authorization.GetAuthorizationBody(Request).Version}/{(MobileType)type}/", bundles);
-
-	private async Task<IActionResult> GetTableAsync(string path)
-	{
-		var dictionary = new Dictionary<string, object>();
-		
-		var objects = FirebaseSetting.Storage?.ListObjects(FirebaseSetting.StorageBucket, path);
-		foreach (var obj in objects)
-		{
-			using var memoryStream = new MemoryStream();
-			var table = await FirebaseSetting.Storage?.DownloadObjectAsync(obj, memoryStream);
-
-			var fileName = table.Name.Split('/').Last();
-			var tableName = fileName.Split('.').First();
-			
-			dictionary.Add(tableName, Encoding.UTF8.GetString(memoryStream.ToArray()));
-		}
-
-		return dictionary.ToResponse();
-	}
 
 	private async Task<IActionResult> PostFilesAsync(string path, IEnumerable<IFormFile> files)
 	{

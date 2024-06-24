@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Redbean.Api;
+using Redbean.Api.Controllers;
 
 namespace Redbean.Extension;
 
@@ -94,6 +95,16 @@ public static class Extension
 			default:
 				return (token as JValue).Value;
 		}
+	}
+
+#endregion
+
+#region User
+
+	public static async Task<UserResponse> GetRequestUser(this HttpRequest request)
+	{
+		var body = Authorization.GetAuthorizationBody(request);
+		return await Redis.GetUserAsync(body.UserId);
 	}
 
 #endregion

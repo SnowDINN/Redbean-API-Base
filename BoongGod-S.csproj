@@ -21,6 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Scripts\Api\EditControllers\" />
       <Folder Include="Scripts\Libraries\" />
     </ItemGroup>
 
