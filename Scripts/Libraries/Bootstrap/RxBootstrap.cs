@@ -12,7 +12,7 @@ public class RxBootstrap : IBootstrap
 	{
 #region Refresh Token Expired Validation
 
-		Observable.Interval(TimeSpan.FromMinutes(1))
+		Observable.Interval(TimeSpan.FromSeconds(60))
 			.Where(_ => Authorization.RefreshTokens.Count > 0)
 			.Subscribe(_ =>
 			{

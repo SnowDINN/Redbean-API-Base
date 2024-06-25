@@ -17,7 +17,7 @@ builder.Services.AddAuthentication(options =>
 		options.TokenValidationParameters = new TokenValidationParameters
 		{
 			// 토큰 만료시간 오차
-			ClockSkew = TimeSpan.FromMinutes(2),
+			ClockSkew = TimeSpan.FromSeconds(120),
 			
 			IssuerSigningKey = new SymmetricSecurityKey(App.SecurityKey),
 			ValidateAudience = false,
