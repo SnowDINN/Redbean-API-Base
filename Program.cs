@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Redbean;
@@ -10,12 +9,6 @@ builder.Services.AddAuthentication(options =>
 	{
 		options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
 		options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-	})
-	.AddGoogle(options =>
-	{
-		options.ClientId = GoogleKey.Client;
-		options.ClientSecret = GoogleKey.ClientSecret;
-		options.SignInScheme = IdentityConstants.ExternalScheme;
 	})
 	.AddJwtBearer(options =>
 	{
@@ -31,8 +24,8 @@ builder.Services.AddAuthentication(options =>
 			ValidateIssuer = false,
 			ValidateIssuerSigningKey = true
 		};
-builder.Services.AddAuthorization();
 	});
+builder.Services.AddAuthorization();
 builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -45,11 +38,7 @@ builder.Services.AddSwaggerGen(options =>
 			Implicit = new OpenApiOAuthFlow
 			{
 				AuthorizationUrl = new Uri("https://accounts.google.com/o/oauth2/v2/auth"),
-				Scopes = new Dictionary<string, string> 
-				{ 
-					{ "https://www.googleapis.com/auth/userinfo.email", "email" }, 
-					{ "https://www.googleapis.com/auth/userinfo.profile", "profile" } 
-				}
+				Scopes = new Dictionary<string, string> { { "https://www.googleapis.com/auth/userinfo.email", "email" }, { "https://www.googleapis.com/auth/userinfo.profile", "profile" } }
 			},
 		}
 	});
@@ -90,12 +79,7 @@ app.MapControllers();
 if (app.Environment.IsDevelopment())
 {
 	app.UseSwagger();
-	app.UseSwaggerUI(options =>
-	{
-		options.DisplayRequestDuration();
-		options.OAuthClientId(GoogleKey.Client);
-		options.OAuthClientSecret(GoogleKey.ClientSecret);
-	});
+	app.UseSwaggerUI();
 }
 
 await app.RunAsync();
