@@ -35,7 +35,7 @@ public class AuthenticationController : ControllerBase
 	/// <summary>
 	/// 리프레시 토큰을 통한 재발급
 	/// </summary>
-	[HttpGet, ApiAuthorize(Role.Administrator, Role.User)]
+	[HttpGet, ApiAuthorize(Role.User)]
 	public IActionResult GetRefreshAccessToken(string refreshToken) => 
 		GetRefreshAccessTokenAsync(refreshToken);
 	

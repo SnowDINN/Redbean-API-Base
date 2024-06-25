@@ -18,7 +18,7 @@ public class CommonController : ControllerBase
 	/// <summary>
 	/// 테이블 데이터
 	/// </summary>
-	[HttpGet, ApiAuthorize(Role.Administrator, Role.User)]
+	[HttpGet, ApiAuthorize(Role.User)]
 	public Task<IActionResult> GetTable() =>
 		GetTableAsync($"Table/{Authorization.GetAuthorizationBody(Request).Version}/");
 	
