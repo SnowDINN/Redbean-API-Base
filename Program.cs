@@ -30,6 +30,19 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
+	options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+	{
+		Type = SecuritySchemeType.OAuth2,
+		Flows = new OpenApiOAuthFlows
+		{
+			Implicit = new OpenApiOAuthFlow
+			{
+				AuthorizationUrl = new Uri("https://accounts.google.com/o/oauth2/v2/auth"),
+				Scopes = new Dictionary<string, string> { { "https://www.googleapis.com/auth/userinfo.email", "email" }, { "https://www.googleapis.com/auth/userinfo.profile", "profile" } }
+			},
+		}
+	});
+	
 	options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
 	{
 		BearerFormat = "JWT",
@@ -48,13 +61,10 @@ builder.Services.AddSwaggerGen(options =>
 				{
 					Type = ReferenceType.SecurityScheme,
 					Id = JwtBearerDefaults.AuthenticationScheme
-				},
-				Scheme = "oauth2",
-				Name = JwtBearerDefaults.AuthenticationScheme,
-				In = ParameterLocation.Header
+				}
 			},
-			new List<string>()
-		}
+            Array.Empty<string>()
+        }
 	});
 });
 
