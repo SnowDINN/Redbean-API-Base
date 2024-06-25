@@ -34,7 +34,6 @@ builder.Services.AddSwaggerGen(options =>
 	{
 		BearerFormat = "JWT",
 		Name = "Authorization",
-		Description = "Authorization header using the Bearer scheme.",
 		In = ParameterLocation.Header,
 		Type = SecuritySchemeType.ApiKey,
 		Scheme = JwtBearerDefaults.AuthenticationScheme
@@ -53,7 +52,6 @@ builder.Services.AddSwaggerGen(options =>
 				Scheme = "oauth2",
 				Name = JwtBearerDefaults.AuthenticationScheme,
 				In = ParameterLocation.Header
-
 			},
 			new List<string>()
 		}
@@ -63,15 +61,15 @@ builder.Services.AddSwaggerGen(options =>
 await Bootstrap.Setup();
 
 var app = builder.Build();
+app.UseAuthorization();
+app.UseAuthentication();
+app.UseHttpsRedirection();
+app.MapControllers();
+
 if (app.Environment.IsDevelopment())
 {
 	app.UseSwagger();
 	app.UseSwaggerUI();
 }
-
-app.UseAuthorization();
-app.UseAuthentication();
-app.UseHttpsRedirection();
-app.MapControllers();
 
 await app.RunAsync();
