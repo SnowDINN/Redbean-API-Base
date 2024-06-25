@@ -26,15 +26,16 @@ public class Authorization
 
 		return new AuthorizationBody
 		{
-			UserId = GetClaims(jwtToken, ClaimTypes.NameIdentifier),
-			Version = GetClaims(jwtToken, ClaimTypes.Version)
+			UserId = GetClaims(jwtToken, ClaimTypes.NameIdentifier).Decrypt(),
+			Version = GetClaims(jwtToken, ClaimTypes.Version).Decrypt(),
+			Role = GetClaims(jwtToken, ClaimTypes.Role)
 		};
 	}
 
 	private static string GetClaims(JwtSecurityToken token, string type)
 	{
 		var value = token.Claims.FirstOrDefault(_ => _.Type == type)?.Value;
-		return string.IsNullOrEmpty(value) ? string.Empty : value.Decrypt();
+		return string.IsNullOrEmpty(value) ? string.Empty : value;
 	}
 }
 
@@ -42,12 +43,20 @@ public class AuthorizationBody
 {
 	public string UserId { get; set; } = "";
 	public string Version { get; set; } = "";
+	public string Role { get; set; } = "";
 }
 
 public class Role
 {
-	public const string Administrator = "Redbean.Boongsin.Administrator";
-	public const string User = "Redbean.Boongsin.User";
+	/// <summary>
+	/// [어드민 권한] Redbean.Boongsin.Administrator
+	/// </summary>
+	public const string Administrator = "4+LIjHPPOByQA/QRXhwOY8hmfCG3QA0XzSbKz0NNTJs=";
+	
+	/// <summary>
+	/// [유저 권한] Redbean.Boongsin.User
+	/// </summary>
+	public const string User = "4+LIjHPPOByQA/QRXhwOY7s8gH8HxiwDWzk+C0icKxw=";
 }
 
 public class RedisKey

@@ -17,36 +17,15 @@ public class AuthenticationController : ControllerBase
 	
 	private const string userKey = "user";
 	private const string tokenKey = "token";
-
-	/// <summary>
-	/// 에디터 전용 토큰 발급
-	/// </summary>
-	[HttpGet]
-	public async Task<IActionResult> GetToken(string uid, string version)
-	{
-		try
-		{
-			var userId = HttpUtility.UrlDecode(uid.Decrypt());
-			var userRecord = await FirebaseAuth.DefaultInstance?.GetUserAsync(userId);
-			
-			if (App.AdministratorKey.Contains(userRecord.Email))
-				return GetTokenAsync(userId, userRecord.Email, version).ToResponse();
-		}
-		catch (FirebaseAuthException)
-		{
-			return BadRequest();
-		}
-
-		return BadRequest();
-	}
 	
 	/// <summary>
 	/// 사용자 로그인 및 토큰 발급
 	/// </summary>
 	[HttpGet]
-	public async Task<IActionResult> GetUser(string uid, string version)
+	public async Task<IActionResult> GetUser(string userId, string version)
 	{
-		var userId = HttpUtility.UrlDecode(uid.Decrypt());
+		userId = HttpUtility.UrlDecode(userId.Decrypt());
+		version = HttpUtility.UrlDecode(version.Decrypt());
 
 		TokenResponse token;
 		UserResponse user;
@@ -68,7 +47,7 @@ public class AuthenticationController : ControllerBase
 				}
 			};
 			
-			token = GetTokenAsync(userId, userRecord.Email, version);
+			token = GenerateTokenAsync(userId, version, userRecord.Email);
 		}
 		catch (FirebaseAuthException)
 		{
@@ -101,7 +80,48 @@ public class AuthenticationController : ControllerBase
 		}.ToResponse();
 	}
 	
-	private TokenResponse GetTokenAsync(string uid, string email, string version)
+	/// <summary>
+	/// 에디터 전용 토큰 발급
+	/// </summary>
+	[HttpGet]
+	public async Task<IActionResult> GetEditorAccessToken(string userId, string version)
+	{
+		userId = HttpUtility.UrlDecode(userId.Decrypt());
+		version = HttpUtility.UrlDecode(version.Decrypt());
+		
+		try
+		{
+			var userRecord = await FirebaseAuth.DefaultInstance?.GetUserAsync(userId);
+
+			if (App.AdministratorKey.Contains(userRecord.Email))
+			{
+				var tokenResponse = GenerateTokenAsync(userId, version, userRecord.Email);
+				Authorization.RefreshTokens[tokenResponse.RefreshToken] = tokenResponse;
+				
+				return tokenResponse.ToResponse();
+			}
+		}
+		catch (FirebaseAuthException)
+		{
+			return BadRequest();
+		}
+
+		return BadRequest();
+	}
+	
+	/// <summary>
+	/// 리프레시 토큰을 통한 재발급
+	/// </summary>
+	[HttpGet, ApiAuthorize(Role.Administrator, Role.User)]
+	public IActionResult GetRefreshAccessToken(string refreshToken)
+	{
+		if (!Authorization.RefreshTokens.ContainsKey(refreshToken))
+			return BadRequest();
+		
+		return RegenerateTokenAsync(Authorization.GetAuthorizationBody(Request), refreshToken).ToResponse();
+	}
+	
+	private TokenResponse GenerateTokenAsync(string userId, string version, string email)
 	{
 		var accessTokenExpire = DateTime.UtcNow.AddSeconds(AccessTokenExpireSecond);
 		var refreshTokenExpire = DateTime.UtcNow.AddSeconds(RefreshTokenExpireSecond);
@@ -109,20 +129,44 @@ public class AuthenticationController : ControllerBase
 		var accessToken = new JwtSecurityToken(expires: accessTokenExpire,
 		                                 claims: new[]
 		                                 {
-			                                 new Claim(ClaimTypes.NameIdentifier, uid.Encrypt()),
-			                                 new Claim(ClaimTypes.Version, version),
+			                                 new Claim(ClaimTypes.NameIdentifier, userId.Encrypt()),
+			                                 new Claim(ClaimTypes.Version, version.Encrypt()),
 			                                 new Claim(ClaimTypes.Role, App.AdministratorKey.Contains(email) ? Role.Administrator : Role.User)
 		                                 },
 		                                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(App.SecurityKey), SecurityAlgorithms.HmacSha256));
 		var refreshToken = $"{Guid.NewGuid()}".Replace("-", "");
 		
-		Authorization.RefreshTokens[uid] = new TokenResponse
+		Authorization.RefreshTokens[refreshToken] = new TokenResponse
 		{
 			AccessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
 			RefreshToken = refreshToken,
 			AccessTokenExpire = accessTokenExpire,
 			RefreshTokenExpire = refreshTokenExpire,
 		};
-		return Authorization.RefreshTokens[uid];
+		return Authorization.RefreshTokens[refreshToken];
+	}
+	
+	private TokenResponse RegenerateTokenAsync(AuthorizationBody body, string refreshToken)
+	{
+		var accessTokenExpire = DateTime.UtcNow.AddSeconds(AccessTokenExpireSecond);
+		var refreshTokenExpire = DateTime.UtcNow.AddSeconds(RefreshTokenExpireSecond);
+		
+		var accessToken = new JwtSecurityToken(expires: accessTokenExpire,
+		                                       claims: new[]
+		                                       {
+			                                       new Claim(ClaimTypes.NameIdentifier, body.UserId.Encrypt()),
+			                                       new Claim(ClaimTypes.Version, body.Version.Encrypt()),
+			                                       new Claim(ClaimTypes.Role, body.Role)
+		                                       },
+		                                       signingCredentials: new SigningCredentials(new SymmetricSecurityKey(App.SecurityKey), SecurityAlgorithms.HmacSha256));
+		
+		Authorization.RefreshTokens[refreshToken] = new TokenResponse
+		{
+			AccessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
+			RefreshToken = refreshToken,
+			AccessTokenExpire = accessTokenExpire,
+			RefreshTokenExpire = refreshTokenExpire,
+		};
+		return Authorization.RefreshTokens[refreshToken];
 	}
 }

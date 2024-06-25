@@ -7,7 +7,7 @@ namespace Redbean.Api.Controllers;
 [Route("[controller]/[action]")]
 public class UserController : ControllerBase
 {
-	[HttpGet, ApiAuthorize(Role.Administrator, Role.User)]
+	[HttpPost, ApiAuthorize(Role.Administrator, Role.User)]
 	public async Task<IActionResult> PostUserNickname(string nickname) => 
 		await PostUserNicknameAsync(nickname);
 
