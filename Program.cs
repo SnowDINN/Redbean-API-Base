@@ -48,12 +48,9 @@ builder.Services.AddSwaggerGen(options =>
 				{
 					Type = ReferenceType.SecurityScheme,
 					Id = JwtBearerDefaults.AuthenticationScheme
-				},
-				Scheme = "oauth2",
-				Name = JwtBearerDefaults.AuthenticationScheme,
-				In = ParameterLocation.Header
+				}
 			},
-			new List<string>()
+			Array.Empty<string>()
 		}
 	});
 });
