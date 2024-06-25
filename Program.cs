@@ -16,10 +16,12 @@ builder.Services.AddAuthentication(options =>
 		options.SaveToken = true;
 		options.TokenValidationParameters = new TokenValidationParameters
 		{
-			ClockSkew = TimeSpan.Zero, // 토큰 만료시간 오차 제거
+			// 토큰 만료시간 오차
+			ClockSkew = TimeSpan.FromMinutes(2),
+			
 			IssuerSigningKey = new SymmetricSecurityKey(App.SecurityKey),
-			ValidateIssuer = false,
 			ValidateAudience = false,
+			ValidateIssuer = false,
 			ValidateIssuerSigningKey = true,
 		};
 	});

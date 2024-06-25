@@ -12,8 +12,8 @@ namespace Redbean.Api.Controllers;
 [Route("[controller]/[action]")]
 public class AuthenticationController : ControllerBase
 {
-	private const long AccessTokenExpireSecond = 600;
-	private const long RefreshTokenExpireSecond = 600;
+	private const long AccessTokenExpireSecond = 60;
+	private const long RefreshTokenExpireSecond = 180;
 	
 	private const string userKey = "user";
 	private const string tokenKey = "token";
@@ -47,7 +47,7 @@ public class AuthenticationController : ControllerBase
 				}
 			};
 			
-			token = GenerateTokenAsync(userId, version, userRecord.Email);
+			token = GenerateUserTokenAsync(userId, version);
 		}
 		catch (FirebaseAuthException)
 		{
@@ -89,17 +89,12 @@ public class AuthenticationController : ControllerBase
 		userId = HttpUtility.UrlDecode(userId.Decrypt());
 		version = HttpUtility.UrlDecode(version.Decrypt());
 		
+		// 사용자 유효성 검사
 		try
 		{
-			var userRecord = await FirebaseAuth.DefaultInstance?.GetUserAsync(userId);
-
-			if (App.AdministratorKey.Contains(userRecord.Email))
-			{
-				var tokenResponse = GenerateTokenAsync(userId, version, userRecord.Email);
-				Authorization.RefreshTokens[tokenResponse.RefreshToken] = tokenResponse;
-				
-				return tokenResponse.ToResponse();
-			}
+			var user = await FirebaseAuth.DefaultInstance?.GetUserAsync(userId);
+			if (App.AdministratorKey.Contains(user.Email))
+				return GenerateAdministratorTokenAsync(userId, version).ToResponse();
 		}
 		catch (FirebaseAuthException)
 		{
@@ -121,7 +116,27 @@ public class AuthenticationController : ControllerBase
 		return RegenerateTokenAsync(Authorization.GetAuthorizationBody(Request), refreshToken).ToResponse();
 	}
 	
-	private TokenResponse GenerateTokenAsync(string userId, string version, string email)
+	private TokenResponse GenerateAdministratorTokenAsync(string userId, string version)
+	{
+		var accessToken = new JwtSecurityToken(expires: DateTime.UtcNow.AddSeconds(30),
+		                                       claims: new[]
+		                                       {
+			                                       new Claim(ClaimTypes.NameIdentifier, userId.Encrypt()),
+			                                       new Claim(ClaimTypes.Version, version.Encrypt()),
+			                                       new Claim(ClaimTypes.Role, Role.Administrator)
+		                                       },
+		                                       signingCredentials: new SigningCredentials(new SymmetricSecurityKey(App.SecurityKey), SecurityAlgorithms.HmacSha256));
+		
+		return new TokenResponse
+		{
+			AccessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
+			RefreshToken = default,
+			AccessTokenExpire = default,
+			RefreshTokenExpire = default,
+		};
+	}
+	
+	private TokenResponse GenerateUserTokenAsync(string userId, string version)
 	{
 		var accessTokenExpire = DateTime.UtcNow.AddSeconds(AccessTokenExpireSecond);
 		var refreshTokenExpire = DateTime.UtcNow.AddSeconds(RefreshTokenExpireSecond);
@@ -131,7 +146,7 @@ public class AuthenticationController : ControllerBase
 		                                 {
 			                                 new Claim(ClaimTypes.NameIdentifier, userId.Encrypt()),
 			                                 new Claim(ClaimTypes.Version, version.Encrypt()),
-			                                 new Claim(ClaimTypes.Role, App.AdministratorKey.Contains(email) ? Role.Administrator : Role.User)
+			                                 new Claim(ClaimTypes.Role, Role.User)
 		                                 },
 		                                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(App.SecurityKey), SecurityAlgorithms.HmacSha256));
 		var refreshToken = $"{Guid.NewGuid()}".Replace("-", "");
