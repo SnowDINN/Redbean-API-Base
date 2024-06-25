@@ -39,7 +39,7 @@ public class AuthenticationController : ControllerBase
 	public IActionResult GetRefreshAccessToken(string refreshToken) => 
 		GetRefreshAccessTokenAsync(refreshToken);
 	
-	public async Task<IActionResult> GetUserAsync(string userId, string version)
+	private async Task<IActionResult> GetUserAsync(string userId, string version)
 	{
 		userId = HttpUtility.UrlDecode(userId.Decryption());
 		version = HttpUtility.UrlDecode(version.Decryption());
@@ -97,7 +97,7 @@ public class AuthenticationController : ControllerBase
 		}.ToResponse();
 	}
 	
-	public async Task<IActionResult> GetEditorAccessTokenAsync(string userId, string version)
+	private async Task<IActionResult> GetEditorAccessTokenAsync(string userId, string version)
 	{
 		userId = HttpUtility.UrlDecode(userId.Decryption());
 		version = HttpUtility.UrlDecode(version.Decryption());

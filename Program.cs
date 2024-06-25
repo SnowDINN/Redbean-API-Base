@@ -12,8 +12,8 @@ builder.Services.AddAuthentication(options =>
 	})
 	.AddJwtBearer(options =>
 	{
-		options.RequireHttpsMetadata = true;
 		options.SaveToken = true;
+		options.RequireHttpsMetadata = true;
 		options.TokenValidationParameters = new TokenValidationParameters
 		{
 			// 토큰 만료시간 오차
@@ -22,7 +22,7 @@ builder.Services.AddAuthentication(options =>
 			IssuerSigningKey = new SymmetricSecurityKey(App.SecurityKey),
 			ValidateAudience = false,
 			ValidateIssuer = false,
-			ValidateIssuerSigningKey = true,
+			ValidateIssuerSigningKey = true
 		};
 	});
 builder.Services.AddAuthorization();
@@ -37,7 +37,7 @@ builder.Services.AddSwaggerGen(options =>
 		Description = "Authorization header using the Bearer scheme.",
 		In = ParameterLocation.Header,
 		Type = SecuritySchemeType.ApiKey,
-		Scheme = JwtBearerDefaults.AuthenticationScheme,
+		Scheme = JwtBearerDefaults.AuthenticationScheme
 	});
 
 	options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -52,7 +52,7 @@ builder.Services.AddSwaggerGen(options =>
 				},
 				Scheme = "oauth2",
 				Name = JwtBearerDefaults.AuthenticationScheme,
-				In = ParameterLocation.Header,
+				In = ParameterLocation.Header
 
 			},
 			new List<string>()
