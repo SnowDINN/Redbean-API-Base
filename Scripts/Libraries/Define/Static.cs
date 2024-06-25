@@ -64,3 +64,9 @@ public class RedisKey
 	public const string APP_CONFIG = nameof(APP_CONFIG);
 	public const string TABLE_CONFIG = nameof(TABLE_CONFIG);
 }
+
+public class GoogleKey
+{
+	public const string Client = "517818090277-b4n17aclsf2ie6e2c06e6fqbqhh9d03u.apps.googleusercontent.com";
+	public const string ClientSecret = "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";
+}
