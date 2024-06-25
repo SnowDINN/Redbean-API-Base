@@ -26,8 +26,8 @@ public class Authorization
 
 		return new AuthorizationBody
 		{
-			UserId = GetClaims(jwtToken, ClaimTypes.NameIdentifier).Decrypt(),
-			Version = GetClaims(jwtToken, ClaimTypes.Version).Decrypt(),
+			UserId = GetClaims(jwtToken, ClaimTypes.NameIdentifier).Decryption(),
+			Version = GetClaims(jwtToken, ClaimTypes.Version).Decryption(),
 			Role = GetClaims(jwtToken, ClaimTypes.Role)
 		};
 	}

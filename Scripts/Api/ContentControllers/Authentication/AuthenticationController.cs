@@ -24,8 +24,8 @@ public class AuthenticationController : ControllerBase
 	[HttpGet]
 	public async Task<IActionResult> GetUser(string userId, string version)
 	{
-		userId = HttpUtility.UrlDecode(userId.Decrypt());
-		version = HttpUtility.UrlDecode(version.Decrypt());
+		userId = HttpUtility.UrlDecode(userId.Decryption());
+		version = HttpUtility.UrlDecode(version.Decryption());
 
 		TokenResponse token;
 		UserResponse user;
@@ -38,7 +38,7 @@ public class AuthenticationController : ControllerBase
 			{
 				Social =
 				{
-					Id = userRecord.Uid.Encrypt(),
+					Id = userRecord.Uid.Encryption(),
 					Platform = userRecord.ProviderData[0].ProviderId
 				},
 				Information =
@@ -86,8 +86,8 @@ public class AuthenticationController : ControllerBase
 	[HttpGet]
 	public async Task<IActionResult> GetEditorAccessToken(string userId, string version)
 	{
-		userId = HttpUtility.UrlDecode(userId.Decrypt());
-		version = HttpUtility.UrlDecode(version.Decrypt());
+		userId = HttpUtility.UrlDecode(userId.Decryption());
+		version = HttpUtility.UrlDecode(version.Decryption());
 		
 		// 사용자 유효성 검사
 		try
@@ -121,8 +121,8 @@ public class AuthenticationController : ControllerBase
 		var accessToken = new JwtSecurityToken(expires: DateTime.UtcNow.AddSeconds(30),
 		                                       claims: new[]
 		                                       {
-			                                       new Claim(ClaimTypes.NameIdentifier, userId.Encrypt()),
-			                                       new Claim(ClaimTypes.Version, version.Encrypt()),
+			                                       new Claim(ClaimTypes.NameIdentifier, userId.Encryption()),
+			                                       new Claim(ClaimTypes.Version, version.Encryption()),
 			                                       new Claim(ClaimTypes.Role, Role.Administrator)
 		                                       },
 		                                       signingCredentials: new SigningCredentials(new SymmetricSecurityKey(App.SecurityKey), SecurityAlgorithms.HmacSha256));
@@ -144,8 +144,8 @@ public class AuthenticationController : ControllerBase
 		var accessToken = new JwtSecurityToken(expires: accessTokenExpire,
 		                                 claims: new[]
 		                                 {
-			                                 new Claim(ClaimTypes.NameIdentifier, userId.Encrypt()),
-			                                 new Claim(ClaimTypes.Version, version.Encrypt()),
+			                                 new Claim(ClaimTypes.NameIdentifier, userId.Encryption()),
+			                                 new Claim(ClaimTypes.Version, version.Encryption()),
 			                                 new Claim(ClaimTypes.Role, Role.User)
 		                                 },
 		                                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(App.SecurityKey), SecurityAlgorithms.HmacSha256));
@@ -169,8 +169,8 @@ public class AuthenticationController : ControllerBase
 		var accessToken = new JwtSecurityToken(expires: accessTokenExpire,
 		                                       claims: new[]
 		                                       {
-			                                       new Claim(ClaimTypes.NameIdentifier, body.UserId.Encrypt()),
-			                                       new Claim(ClaimTypes.Version, body.Version.Encrypt()),
+			                                       new Claim(ClaimTypes.NameIdentifier, body.UserId.Encryption()),
+			                                       new Claim(ClaimTypes.Version, body.Version.Encryption()),
 			                                       new Claim(ClaimTypes.Role, body.Role)
 		                                       },
 		                                       signingCredentials: new SigningCredentials(new SymmetricSecurityKey(App.SecurityKey), SecurityAlgorithms.HmacSha256));
