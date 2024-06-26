@@ -3,7 +3,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Redbean;
 using Redbean.Api;
-using Redbean.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAuthentication(options =>
@@ -67,13 +66,10 @@ app.MapControllers();
 if (app.Environment.IsDevelopment())
 {
 	// Swagger Authorization
-	app.UseMiddleware<SwaggerGoogleAuthorization>();
+	app.UseMiddleware<GoogleAuthorization>();
 	
 	app.UseSwagger();
-	app.UseSwaggerUI(_ =>
-	{
-		_.SwaggerEndpoint("/swagger/v1/swagger.json", "SecureSwagger v1");
-	});
+	app.UseSwaggerUI();
 }
 
 await app.RunAsync();
