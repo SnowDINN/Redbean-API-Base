@@ -47,7 +47,7 @@ public class Redis
 
 	public static async Task Initialize()
 	{
-		Multiplexer = await ConnectionMultiplexer.ConnectAsync("localhost");
+		Multiplexer = await ConnectionMultiplexer.ConnectAsync("host.docker.internal:6379");
 	}
 
 	/// <summary>
