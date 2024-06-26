@@ -9,7 +9,7 @@ public class GoogleAuthorization(RequestDelegate next)
 {
 	public async Task InvokeAsync(HttpContext context)
 	{
-		if (context.Request.Path.StartsWithSegments("/swagger"))
+		if (context.Request.Path.StartsWithSegments("/swagger/index.html"))
 		{
 			var credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(new ClientSecrets
 			                                                                   {
@@ -19,7 +19,8 @@ public class GoogleAuthorization(RequestDelegate next)
 			                                                                   new[] { "openid", "email" },
 			                                                                   "user",
 			                                                                   CancellationToken.None);
-
+			await credential.Flow.DataStore.ClearAsync();
+			
 			using var http = new HttpClient
 			{
 				DefaultRequestHeaders =
