@@ -9,16 +9,22 @@ public class App
 {
 	public static readonly byte[] SecurityKey = Encoding.ASCII.GetBytes($"{Guid.NewGuid()}".Replace("-", ""));
 	public static readonly string[] AdministratorKey = ["mfactory86@gmail.com"];
-
-	public static readonly Dictionary<string, AuthenticationState> State = new();
 }
 
 public class Authorization
 {
+	/// <summary>
+	/// Google Authorization State
+	/// </summary>
+	public static readonly Dictionary<string, AuthenticationState> State = new();
+	
+	/// <summary>
+	/// JWT Refresh Tokens
+	/// </summary>
 	public static readonly Dictionary<string, TokenResponse> RefreshTokens = new();
 
 	/// <summary>
-	/// JWT 토큰 데이터
+	/// JWT Body
 	/// </summary>
 	public static AuthorizationBody GetAuthorizationBody(HttpRequest request)
 	{

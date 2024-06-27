@@ -27,7 +27,7 @@ builder.Services.AddAuthentication(options =>
 			var query = HttpUtility.ParseQueryString(queryCollection);
 			
 			var email = ticket.Identity.Claims.FirstOrDefault(_ => _.Type == ClaimTypes.Email).Value;
-			App.State[query["state"]].isAuthentication = App.AdministratorKey.Contains(email);
+			Authorization.State[query["state"]].isAuthentication = App.AdministratorKey.Contains(email);
 
 			return Task.CompletedTask;
 		};

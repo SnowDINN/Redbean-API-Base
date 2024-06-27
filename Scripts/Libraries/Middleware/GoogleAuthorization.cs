@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Redbean.Api;
+using Authorization = Redbean.Api.Authorization;
 
 namespace Redbean;
 
@@ -15,7 +16,7 @@ public class GoogleAuthorization(RequestDelegate next)
 		{
 			if (context.Request.Query.TryGetValue("state", out var value))
 			{
-				if (App.State.Remove(value, out var user))
+				if (Authorization.State.Remove(value, out var user))
 				{
 					if (user.isAuthentication)
 					{
@@ -35,7 +36,7 @@ public class GoogleAuthorization(RequestDelegate next)
 			};
 			await context.ChallengeAsync(GoogleDefaults.AuthenticationScheme, properties);
 			
-			App.State.TryAdd(state, new AuthenticationState
+			Authorization.State.TryAdd(state, new AuthenticationState
 			{
 				Expire = DateTime.UtcNow.AddSeconds(ExpiredSecond)
 			});

@@ -25,15 +25,15 @@ public class RxBootstrap : IBootstrap
 			}).AddTo(disposables);
 		
 		Observable.Interval(TimeSpan.FromSeconds(60))
-			.Where(_ => App.State.Count > 0)
+			.Where(_ => Authorization.State.Count > 0)
 			.Subscribe(_ =>
 			{
-				var removes = (from state in App.State
+				var removes = (from state in Authorization.State
 				               where state.Value.Expire < DateTime.UtcNow
 				               select state.Key).ToList();
 
 				foreach (var remove in removes)
-					App.State.Remove(remove);
+					Authorization.State.Remove(remove);
 			}).AddTo(disposables);
 
 #endregion
