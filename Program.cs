@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Any;
+using Microsoft.OpenApi.Interfaces;
 using Microsoft.OpenApi.Models;
 using Redbean;
 using Redbean.Api;
@@ -52,6 +54,26 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
+	options.AddSecurityDefinition("Google Token", new OpenApiSecurityScheme
+	{
+		Name = "Authorization",
+		In = ParameterLocation.Header,
+		Type = SecuritySchemeType.OAuth2,
+		Flows = new OpenApiOAuthFlows
+		{
+			AuthorizationCode = new OpenApiOAuthFlow
+			{
+				AuthorizationUrl = new Uri(GoogleDefaults.AuthorizationEndpoint),
+				TokenUrl = new Uri(GoogleDefaults.TokenEndpoint),
+				Scopes =
+				{
+					{ "email", "email" }
+				}
+			}
+		},
+		Scheme = JwtBearerDefaults.AuthenticationScheme
+	});
+	
 	options.AddSecurityDefinition("JWT Token", new OpenApiSecurityScheme
 	{
 		Name = "Authorization",
@@ -90,7 +112,11 @@ if (app.Environment.IsDevelopment())
 	app.UseMiddleware<GoogleAuthorization>();
 	
 	app.UseSwagger();
-	app.UseSwaggerUI();
+	app.UseSwaggerUI(_ =>
+	{
+		_.OAuthClientId("517818090277-dh7nin47elvha6uhn64ihiboij7pv57p.apps.googleusercontent.com");
+		_.OAuthClientSecret("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");
+	});
 }
 
 await app.RunAsync();
