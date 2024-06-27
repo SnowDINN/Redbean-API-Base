@@ -23,6 +23,18 @@ public class RxBootstrap : IBootstrap
 				foreach (var remove in removes)
 					Authorization.RefreshTokens.Remove(remove);
 			}).AddTo(disposables);
+		
+		Observable.Interval(TimeSpan.FromSeconds(60))
+			.Where(_ => App.State.Count > 0)
+			.Subscribe(_ =>
+			{
+				var removes = (from state in App.State
+				               where state.Value.Expire < DateTime.UtcNow
+				               select state.Key).ToList();
+
+				foreach (var remove in removes)
+					App.State.Remove(remove);
+			}).AddTo(disposables);
 
 #endregion
 		

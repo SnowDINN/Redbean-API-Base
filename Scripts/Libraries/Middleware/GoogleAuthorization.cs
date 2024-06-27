@@ -1,44 +1,44 @@
 ﻿using System.Net;
-using Google.Apis.Auth.OAuth2;
-using Newtonsoft.Json.Linq;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
 using Redbean.Api;
 
 namespace Redbean;
 
 public class GoogleAuthorization(RequestDelegate next)
 {
+	private const int ExpiredSecond = 300;
+
 	public async Task InvokeAsync(HttpContext context)
 	{
 		if (context.Request.Path.StartsWithSegments("/swagger/index.html"))
 		{
-			var credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(new ClientSecrets
-			                                                                   {
-				                                                                   ClientId = "517818090277-dh7nin47elvha6uhn64ihiboij7pv57p.apps.googleusercontent.com",
-				                                                                   ClientSecret = "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"
-			                                                                   },
-			                                                                   new[] { "openid", "email" },
-			                                                                   "user",
-			                                                                   CancellationToken.None);
-			await credential.Flow.DataStore.ClearAsync();
-			
-			using var http = new HttpClient
+			if (context.Request.Query.TryGetValue("state", out var value))
 			{
-				DefaultRequestHeaders =
+				if (App.State.Remove(value, out var user))
 				{
-					{ "Authorization", "Bearer " + credential.Token.AccessToken }
+					if (user.isAuthentication)
+					{
+						await next.Invoke(context).ConfigureAwait(false);
+						return;
+					}
+					
+					context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+					return;
 				}
-			};
-			var response = await http.GetAsync("https://openidconnect.googleapis.com/v1/userinfo");
-			var user = JObject.Parse(await response.Content.ReadAsStringAsync());
-			var userEmail = (string)user.GetValue("email");
-			
-			if (App.AdministratorKey.Contains(userEmail))
-			{
-				await next.Invoke(context).ConfigureAwait(false);
-				return;
 			}
+
+			var state = $"{Guid.NewGuid()}".Replace("-", "");
+			var properties = new AuthenticationProperties
+			{
+				RedirectUri = $"/swagger/index.html?state={state}"
+			};
+			await context.ChallengeAsync(GoogleDefaults.AuthenticationScheme, properties);
 			
-			context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+			App.State.TryAdd(state, new AuthenticationState
+			{
+				Expire = DateTime.UtcNow.AddSeconds(ExpiredSecond)
+			});
 		}
 		else
 			await next.Invoke(context).ConfigureAwait(false);

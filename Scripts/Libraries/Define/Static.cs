@@ -9,6 +9,8 @@ public class App
 {
 	public static readonly byte[] SecurityKey = Encoding.ASCII.GetBytes($"{Guid.NewGuid()}".Replace("-", ""));
 	public static readonly string[] AdministratorKey = ["mfactory86@gmail.com"];
+
+	public static readonly Dictionary<string, AuthenticationState> State = new();
 }
 
 public class Authorization
@@ -37,13 +39,6 @@ public class Authorization
 		var value = token.Claims.FirstOrDefault(_ => _.Type == type)?.Value;
 		return string.IsNullOrEmpty(value) ? string.Empty : value;
 	}
-}
-
-public class AuthorizationBody
-{
-	public string UserId { get; set; } = "";
-	public string Version { get; set; } = "";
-	public string Role { get; set; } = "";
 }
 
 public class Role

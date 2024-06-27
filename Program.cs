@@ -1,3 +1,7 @@
+using System.Security.Claims;
+using System.Web;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -7,8 +11,26 @@ using Redbean.Api;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAuthentication(options =>
 	{
+		options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+		options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
 		options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-		options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+	})
+	.AddCookie()
+	.AddGoogle(options =>
+	{
+		options.ClientId = "517818090277-b4n17aclsf2ie6e2c06e6fqbqhh9d03u.apps.googleusercontent.com";
+		options.ClientSecret = "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";
+		
+		options.Events.OnCreatingTicket = ticket =>
+		{
+			var queryCollection = ticket.Properties.RedirectUri.Split('?').Last();
+			var query = HttpUtility.ParseQueryString(queryCollection);
+			
+			var email = ticket.Identity.Claims.FirstOrDefault(_ => _.Type == ClaimTypes.Email).Value;
+			App.State[query["state"]].isAuthentication = App.AdministratorKey.Contains(email);
+
+			return Task.CompletedTask;
+		};
 	})
 	.AddJwtBearer(options =>
 	{
