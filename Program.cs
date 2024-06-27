@@ -13,7 +13,7 @@ builder.Services.AddAuthentication(options =>
 	{
 		options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 		options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
-		options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+		options.DefaultAuthenticateScheme = GoogleDefaults.AuthenticationScheme;
 	})
 	.AddCookie()
 	.AddGoogle(options =>
@@ -21,6 +21,7 @@ builder.Services.AddAuthentication(options =>
 		options.ClientId = "517818090277-b4n17aclsf2ie6e2c06e6fqbqhh9d03u.apps.googleusercontent.com";
 		options.ClientSecret = "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";
 		
+		options.SaveTokens = true;
 		options.Events.OnCreatingTicket = ticket =>
 		{
 			var queryCollection = ticket.Properties.RedirectUri.Split('?').Last();
@@ -35,7 +36,6 @@ builder.Services.AddAuthentication(options =>
 	.AddJwtBearer(options =>
 	{
 		options.SaveToken = true;
-		options.RequireHttpsMetadata = true;
 		options.TokenValidationParameters = new TokenValidationParameters
 		{
 			// 토큰 만료시간 오차

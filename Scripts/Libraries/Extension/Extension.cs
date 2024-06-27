@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Redbean.Api;
-using Redbean.Api.Controllers;
 
 namespace Redbean.Extension;
 
