@@ -52,7 +52,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-	options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
+	options.AddSecurityDefinition("JWT Token", new OpenApiSecurityScheme
 	{
 		Name = "Authorization",
 		In = ParameterLocation.Header,
