@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Redbean.Api;
-using Authorization = Redbean.Api.Authorization;
 
 namespace Redbean;
 
