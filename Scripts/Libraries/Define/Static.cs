@@ -14,16 +14,6 @@ public class App
 public class Authorization
 {
 	/// <summary>
-	/// Google Authorization State
-	/// </summary>
-	public static readonly Dictionary<string, AuthenticationState> State = new();
-	
-	/// <summary>
-	/// JWT Refresh Tokens
-	/// </summary>
-	public static readonly Dictionary<string, TokenResponse> RefreshTokens = new();
-
-	/// <summary>
 	/// JWT Body
 	/// </summary>
 	public static AuthorizationBody GetAuthorizationBody(HttpRequest request)
@@ -45,6 +35,26 @@ public class Authorization
 		var value = token.Claims.FirstOrDefault(_ => _.Type == type)?.Value;
 		return string.IsNullOrEmpty(value) ? string.Empty : value;
 	}
+}
+
+public class GoogleAuthentication
+{
+	public const string GoogleScheme = "Google Token";
+	
+	/// <summary>
+	/// Google Authorization State
+	/// </summary>
+	public static readonly Dictionary<string, AuthenticationState> State = new();
+}
+
+public class JwtAuthentication
+{
+	public const string JwtScheme = "JWT Token";
+	
+	/// <summary>
+	/// JWT Refresh Tokens
+	/// </summary>
+	public static readonly Dictionary<string, TokenResponse> RefreshTokens = new();
 }
 
 public class Role

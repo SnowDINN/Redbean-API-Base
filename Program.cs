@@ -2,15 +2,13 @@ using System.Security.Claims;
 using System.Web;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Any;
-using Microsoft.OpenApi.Interfaces;
 using Microsoft.OpenApi.Models;
 using Redbean;
 using Redbean.Api;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(options =>
 	{
 		options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -30,7 +28,7 @@ builder.Services.AddAuthentication(options =>
 			var query = HttpUtility.ParseQueryString(queryCollection);
 			
 			var email = ticket.Identity.Claims.FirstOrDefault(_ => _.Type == ClaimTypes.Email).Value;
-			Authorization.State[query["state"]].isAuthentication = App.AdministratorKey.Contains(email);
+			GoogleAuthentication.State[query["state"]].isAuthentication = App.AdministratorKey.Contains(email);
 
 			return Task.CompletedTask;
 		};
@@ -49,12 +47,11 @@ builder.Services.AddAuthentication(options =>
 			ValidateIssuerSigningKey = true
 		};
 	});
-builder.Services.AddAuthorization();
 builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-	options.AddSecurityDefinition("Google Token", new OpenApiSecurityScheme
+	options.AddSecurityDefinition(GoogleAuthentication.GoogleScheme, new OpenApiSecurityScheme
 	{
 		Name = "Authorization",
 		In = ParameterLocation.Header,
@@ -71,15 +68,16 @@ builder.Services.AddSwaggerGen(options =>
 				}
 			}
 		},
-		Scheme = JwtBearerDefaults.AuthenticationScheme
+		Scheme = GoogleAuthentication.GoogleScheme
 	});
+	options.OperationFilter<AuthorizationOperationFilter>();
 	
-	options.AddSecurityDefinition("JWT Token", new OpenApiSecurityScheme
+	options.AddSecurityDefinition(JwtAuthentication.JwtScheme, new OpenApiSecurityScheme
 	{
 		Name = "Authorization",
 		In = ParameterLocation.Header,
 		Type = SecuritySchemeType.ApiKey,
-		Scheme = JwtBearerDefaults.AuthenticationScheme
+		Scheme = JwtAuthentication.JwtScheme
 	});
 
 	options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -90,7 +88,7 @@ builder.Services.AddSwaggerGen(options =>
 				Reference = new OpenApiReference
 				{
 					Type = ReferenceType.SecurityScheme,
-					Id = JwtBearerDefaults.AuthenticationScheme
+					Id = JwtAuthentication.JwtScheme
 				}
 			},
 			Array.Empty<string>()

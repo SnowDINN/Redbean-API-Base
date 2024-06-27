@@ -119,7 +119,7 @@ public class AuthenticationController : ControllerBase
 
 	private IActionResult GetRefreshAccessTokenAsync(string refreshToken)
 	{
-		if (!Authorization.RefreshTokens.ContainsKey(refreshToken))
+		if (!JwtAuthentication.RefreshTokens.ContainsKey(refreshToken))
 			return BadRequest();
 		
 		return RegenerateUserToken(Authorization.GetAuthorizationBody(Request), refreshToken).ToResponse();
@@ -154,14 +154,14 @@ public class AuthenticationController : ControllerBase
 		                                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(App.SecurityKey), SecurityAlgorithms.HmacSha256));
 		var refreshToken = $"{Guid.NewGuid()}".Replace("-", "");
 		
-		Authorization.RefreshTokens[refreshToken] = new TokenResponse
+		JwtAuthentication.RefreshTokens[refreshToken] = new TokenResponse
 		{
 			AccessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
 			RefreshToken = refreshToken,
 			AccessTokenExpire = accessTokenExpire,
 			RefreshTokenExpire = refreshTokenExpire,
 		};
-		return Authorization.RefreshTokens[refreshToken];
+		return JwtAuthentication.RefreshTokens[refreshToken];
 	}
 	
 	private TokenResponse RegenerateUserToken(AuthorizationBody body, string refreshToken)
@@ -178,13 +178,13 @@ public class AuthenticationController : ControllerBase
 		                                       },
 		                                       signingCredentials: new SigningCredentials(new SymmetricSecurityKey(App.SecurityKey), SecurityAlgorithms.HmacSha256));
 		
-		Authorization.RefreshTokens[refreshToken] = new TokenResponse
+		JwtAuthentication.RefreshTokens[refreshToken] = new TokenResponse
 		{
 			AccessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
 			RefreshToken = refreshToken,
 			AccessTokenExpire = accessTokenExpire,
 			RefreshTokenExpire = refreshTokenExpire,
 		};
-		return Authorization.RefreshTokens[refreshToken];
+		return JwtAuthentication.RefreshTokens[refreshToken];
 	}
 }
