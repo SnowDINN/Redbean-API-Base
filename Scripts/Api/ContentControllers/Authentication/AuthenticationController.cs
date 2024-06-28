@@ -131,7 +131,7 @@ public class AuthenticationController : ControllerBase
 			                                       new Claim(ClaimTypes.NameIdentifier, userId.Encryption()),
 			                                       new Claim(ClaimTypes.Role, Role.Administrator)
 		                                       },
-		                                       signingCredentials: new SigningCredentials(new SymmetricSecurityKey(App.SecurityKey), SecurityAlgorithms.HmacSha256));
+		                                       signingCredentials: new SigningCredentials(new SymmetricSecurityKey(AppSecurity.SecurityKey), SecurityAlgorithms.HmacSha256));
 		
 		return new JwtSecurityTokenHandler().WriteToken(accessToken);
 	}
@@ -147,7 +147,7 @@ public class AuthenticationController : ControllerBase
 			                                 new Claim(ClaimTypes.NameIdentifier, userId.Encryption()),
 			                                 new Claim(ClaimTypes.Role, Role.User)
 		                                 },
-		                                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(App.SecurityKey), SecurityAlgorithms.HmacSha256));
+		                                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(AppSecurity.SecurityKey), SecurityAlgorithms.HmacSha256));
 		var refreshToken = $"{Guid.NewGuid()}".Replace("-", "");
 		
 		JwtAuthentication.RefreshTokens[refreshToken] = new TokenResponse
@@ -171,7 +171,7 @@ public class AuthenticationController : ControllerBase
 			                                       new Claim(ClaimTypes.NameIdentifier, userId.Encryption()),
 			                                       new Claim(ClaimTypes.Role, Role.User)
 		                                       },
-		                                       signingCredentials: new SigningCredentials(new SymmetricSecurityKey(App.SecurityKey), SecurityAlgorithms.HmacSha256));
+		                                       signingCredentials: new SigningCredentials(new SymmetricSecurityKey(AppSecurity.SecurityKey), SecurityAlgorithms.HmacSha256));
 		
 		JwtAuthentication.RefreshTokens[refreshToken] = new TokenResponse
 		{

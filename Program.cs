@@ -42,7 +42,7 @@ builder.Services.AddAuthentication(options =>
 			// 토큰 만료시간 오차
 			ClockSkew = TimeSpan.FromSeconds(120),
 			
-			IssuerSigningKey = new SymmetricSecurityKey(App.SecurityKey),
+			IssuerSigningKey = new SymmetricSecurityKey(AppSecurity.SecurityKey),
 			ValidateAudience = false,
 			ValidateIssuer = false,
 			ValidateIssuerSigningKey = true
@@ -52,20 +52,20 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-	options.AddSecurityDefinition(JwtAuthentication.JwtScheme, new OpenApiSecurityScheme
+	options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
 	{
-		Name = App.AuthorizationScheme,
+		Name = "Authorization",
 		In = ParameterLocation.Header,
 		Type = SecuritySchemeType.ApiKey,
-		Scheme = JwtAuthentication.JwtScheme
+		Scheme = JwtBearerDefaults.AuthenticationScheme
 	});
 	
-	options.AddSecurityDefinition(App.VersionScheme, new OpenApiSecurityScheme
+	options.AddSecurityDefinition(AppDefaults.VersionScheme, new OpenApiSecurityScheme
 	{
-		Name = App.VersionScheme,
+		Name = "Version",
 		In = ParameterLocation.Header,
 		Type = SecuritySchemeType.ApiKey,
-		Scheme = App.VersionScheme
+		Scheme = AppDefaults.VersionScheme
 	});
 
 	options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -76,7 +76,7 @@ builder.Services.AddSwaggerGen(options =>
 				Reference = new OpenApiReference
 				{
 					Type = ReferenceType.SecurityScheme,
-					Id = JwtAuthentication.JwtScheme
+					Id = JwtBearerDefaults.AuthenticationScheme
 				}
 			},
 			Array.Empty<string>()
@@ -87,7 +87,7 @@ builder.Services.AddSwaggerGen(options =>
 				Reference = new OpenApiReference
 				{
 					Type = ReferenceType.SecurityScheme,
-					Id = App.VersionScheme
+					Id = AppDefaults.VersionScheme
 				}
 			},
 			Array.Empty<string>()

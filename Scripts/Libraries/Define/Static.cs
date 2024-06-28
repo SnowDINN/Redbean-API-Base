@@ -5,11 +5,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace Redbean.Api;
 
-public class App
+public class AppSecurity
 {
 	public static readonly byte[] SecurityKey = Encoding.ASCII.GetBytes($"{Guid.NewGuid()}".Replace("-", ""));
-	
-	public const string AuthorizationScheme = "Authorization";
+}
+
+public class AppDefaults
+{
 	public const string VersionScheme = "Version";
 }
 
@@ -53,8 +55,6 @@ public class GoogleAuthentication
 
 public class JwtAuthentication
 {
-	public const string JwtScheme = "JWT";
-	
 	/// <summary>
 	/// JWT Refresh Tokens
 	/// </summary>
