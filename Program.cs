@@ -56,7 +56,7 @@ builder.Services.AddSwaggerGen(options =>
 	{
 		Name = "Authorization",
 		In = ParameterLocation.Header,
-		Type = SecuritySchemeType.ApiKey,
+		Type = SecuritySchemeType.Http,
 		Scheme = JwtBearerDefaults.AuthenticationScheme
 	});
 	
@@ -65,7 +65,6 @@ builder.Services.AddSwaggerGen(options =>
 		Name = "Version",
 		In = ParameterLocation.Header,
 		Type = SecuritySchemeType.ApiKey,
-		Scheme = AppDefaults.VersionScheme
 	});
 
 	options.AddSecurityRequirement(new OpenApiSecurityRequirement
