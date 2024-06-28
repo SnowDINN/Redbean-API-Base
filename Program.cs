@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Web;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Redbean;
@@ -12,8 +13,8 @@ builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(options =>
 	{
 		options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-		options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
-		options.DefaultAuthenticateScheme = GoogleDefaults.AuthenticationScheme;
+		options.DefaultChallengeScheme = $"{GoogleDefaults.AuthenticationScheme},{JwtBearerDefaults.AuthenticationScheme}";
+		options.DefaultAuthenticateScheme = $"{GoogleDefaults.AuthenticationScheme},{JwtBearerDefaults.AuthenticationScheme}";
 	})
 	.AddCookie()
 	.AddGoogle(options =>
@@ -28,7 +29,7 @@ builder.Services.AddAuthentication(options =>
 			var query = HttpUtility.ParseQueryString(queryCollection);
 			
 			var email = ticket.Identity.Claims.FirstOrDefault(_ => _.Type == ClaimTypes.Email).Value;
-			GoogleAuthentication.State[query["state"]].isAuthentication = App.AdministratorKey.Contains(email);
+			GoogleAuthentication.State[query["state"]].isAuthentication = Authorization.Administrators.Contains(email);
 
 			return Task.CompletedTask;
 		};
@@ -51,33 +52,20 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-	options.AddSecurityDefinition(GoogleAuthentication.GoogleScheme, new OpenApiSecurityScheme
-	{
-		Name = "Authorization",
-		In = ParameterLocation.Header,
-		Type = SecuritySchemeType.OAuth2,
-		Flows = new OpenApiOAuthFlows
-		{
-			AuthorizationCode = new OpenApiOAuthFlow
-			{
-				AuthorizationUrl = new Uri(GoogleDefaults.AuthorizationEndpoint),
-				TokenUrl = new Uri(GoogleDefaults.TokenEndpoint),
-				Scopes =
-				{
-					{ "email", "email" }
-				}
-			}
-		},
-		Scheme = GoogleAuthentication.GoogleScheme
-	});
-	options.OperationFilter<AuthorizationOperationFilter>();
-	
 	options.AddSecurityDefinition(JwtAuthentication.JwtScheme, new OpenApiSecurityScheme
 	{
-		Name = "Authorization",
+		Name = App.AuthorizationScheme,
 		In = ParameterLocation.Header,
 		Type = SecuritySchemeType.ApiKey,
 		Scheme = JwtAuthentication.JwtScheme
+	});
+	
+	options.AddSecurityDefinition(App.VersionScheme, new OpenApiSecurityScheme
+	{
+		Name = App.VersionScheme,
+		In = ParameterLocation.Header,
+		Type = SecuritySchemeType.ApiKey,
+		Scheme = App.VersionScheme
 	});
 
 	options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -89,6 +77,17 @@ builder.Services.AddSwaggerGen(options =>
 				{
 					Type = ReferenceType.SecurityScheme,
 					Id = JwtAuthentication.JwtScheme
+				}
+			},
+			Array.Empty<string>()
+		},
+		{
+			new OpenApiSecurityScheme
+			{
+				Reference = new OpenApiReference
+				{
+					Type = ReferenceType.SecurityScheme,
+					Id = App.VersionScheme
 				}
 			},
 			Array.Empty<string>()
@@ -110,11 +109,7 @@ if (app.Environment.IsDevelopment())
 	app.UseMiddleware<GoogleAuthorization>();
 	
 	app.UseSwagger();
-	app.UseSwaggerUI(_ =>
-	{
-		_.OAuthClientId("517818090277-dh7nin47elvha6uhn64ihiboij7pv57p.apps.googleusercontent.com");
-		_.OAuthClientSecret("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");
-	});
+	app.UseSwaggerUI();
 }
 
 await app.RunAsync();

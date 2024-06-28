@@ -8,15 +8,22 @@ namespace Redbean.Api;
 public class App
 {
 	public static readonly byte[] SecurityKey = Encoding.ASCII.GetBytes($"{Guid.NewGuid()}".Replace("-", ""));
-	public static readonly string[] AdministratorKey = ["mfactory86@gmail.com"];
+	
+	public const string AuthorizationScheme = "Authorization";
+	public const string VersionScheme = "Version";
 }
 
 public class Authorization
 {
-	/// <summary>
-	/// JWT Body
-	/// </summary>
-	public static AuthorizationBody GetAuthorizationBody(HttpRequest request)
+	public static readonly string[] Administrators = ["mfactory86@gmail.com"];
+
+	public static string GetUserId(HttpRequest request) => 
+		GetAuthorizationBody(request).UserId;
+
+	public static string GetVersion(HttpRequest request) =>
+		request.Headers["Version"].FirstOrDefault();
+	
+	private static AuthorizationBody GetAuthorizationBody(HttpRequest request)
 	{
 		var header = request.Headers.Authorization.FirstOrDefault();
 		var headerToken = header?.Replace($"{JwtBearerDefaults.AuthenticationScheme} ", "");
@@ -25,7 +32,6 @@ public class Authorization
 		return new AuthorizationBody
 		{
 			UserId = GetClaims(jwtToken, ClaimTypes.NameIdentifier).Decryption(),
-			Version = GetClaims(jwtToken, ClaimTypes.Version).Decryption(),
 			Role = GetClaims(jwtToken, ClaimTypes.Role)
 		};
 	}
@@ -39,8 +45,6 @@ public class Authorization
 
 public class GoogleAuthentication
 {
-	public const string GoogleScheme = "Google Token";
-	
 	/// <summary>
 	/// Google Authorization State
 	/// </summary>
@@ -49,7 +53,7 @@ public class GoogleAuthentication
 
 public class JwtAuthentication
 {
-	public const string JwtScheme = "JWT Token";
+	public const string JwtScheme = "JWT";
 	
 	/// <summary>
 	/// JWT Refresh Tokens

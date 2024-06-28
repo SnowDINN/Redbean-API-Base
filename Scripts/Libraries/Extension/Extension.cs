@@ -100,11 +100,8 @@ public static class Extension
 
 #region User
 
-	public static async Task<UserResponse> GetRequestUser(this HttpRequest request)
-	{
-		var body = Authorization.GetAuthorizationBody(request);
-		return await Redis.GetUserAsync(body.UserId);
-	}
+	public static async Task<UserResponse> GetRequestUser(this HttpRequest request) =>
+		await Redis.GetUserAsync(Authorization.GetUserId(request));
 
 #endregion
 }

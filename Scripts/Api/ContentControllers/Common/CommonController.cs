@@ -20,7 +20,7 @@ public class CommonController : ControllerBase
 	/// </summary>
 	[HttpGet, ApiAuthorize(Role.User)]
 	public Task<IActionResult> GetTable() =>
-		GetTableAsync($"Table/{Authorization.GetAuthorizationBody(Request).Version}/");
+		GetTableAsync($"Table/{Authorization.GetVersion(Request)}/");
 	
 	
 	private async Task<IActionResult> GetAppConfigAsync()

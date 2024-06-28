@@ -13,14 +13,14 @@ public class StorageController : ControllerBase
 	/// </summary>
 	[HttpPost, ApiAuthorize(Role.Administrator)]
 	public Task<IActionResult> PostTableFiles(IFormFile[] tables) => 
-		PostFilesAsync($"Table/{Authorization.GetAuthorizationBody(Request).Version}/", tables);
+		PostFilesAsync($"Table/{Authorization.GetVersion(Request)}/", tables);
 
 	/// <summary>
 	/// 번들 데이터 업데이트
 	/// </summary>
 	[HttpPost, ApiAuthorize(Role.Administrator)]
 	public Task<IActionResult> PostBundleFiles(int type, IFormFile[] bundles) => 
-		PostFilesAsync($"Bundle/{Authorization.GetAuthorizationBody(Request).Version}/{(MobileType)type}/", bundles);
+		PostFilesAsync($"Bundle/{Authorization.GetVersion(Request)}/{(MobileType)type}/", bundles);
 
 	private async Task<IActionResult> PostFilesAsync(string path, IEnumerable<IFormFile> files)
 	{
