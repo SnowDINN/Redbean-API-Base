@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Redbean.Extension;
 using Object = Google.Apis.Storage.v1.Data.Object;
 
 namespace Redbean.Api.Controllers;
@@ -12,17 +11,17 @@ public class StorageController : ControllerBase
 	/// 테이블 데이터 업데이트
 	/// </summary>
 	[HttpPost, ApiAuthorize(Role.Administrator)]
-	public Task<IActionResult> PostTableFiles(IFormFile[] tables) => 
+	public Task<StringArrayResponse> PostTableFiles(IFormFile[] tables) => 
 		PostFilesAsync($"Table/{Authorization.GetVersion(Request)}/", tables);
 
 	/// <summary>
 	/// 번들 데이터 업데이트
 	/// </summary>
 	[HttpPost, ApiAuthorize(Role.Administrator)]
-	public Task<IActionResult> PostBundleFiles(int type, IFormFile[] bundles) => 
+	public Task<StringArrayResponse> PostBundleFiles(int type, IFormFile[] bundles) => 
 		PostFilesAsync($"Bundle/{Authorization.GetVersion(Request)}/{(MobileType)type}/", bundles);
 
-	private async Task<IActionResult> PostFilesAsync(string path, IEnumerable<IFormFile> files)
+	private async Task<StringArrayResponse> PostFilesAsync(string path, IEnumerable<IFormFile> files)
 	{
 		await DeleteFiles(path);
 
@@ -38,7 +37,7 @@ public class StorageController : ControllerBase
 			await FirebaseSetting.Storage?.UploadObjectAsync(obj, file.OpenReadStream());	
 		}
 		
-		return files.Select(_ => _.FileName).ToResponse();
+		return new StringArrayResponse(files.Select(_ => _.FileName));
 	}
 	
 	private async Task DeleteFiles(string path)

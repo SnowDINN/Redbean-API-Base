@@ -14,32 +14,29 @@ public class AuthenticationController : ControllerBase
 {
 	private const long AccessTokenExpireSecond = 1800;
 	private const long RefreshTokenExpireSecond = 2100;
-	
-	private const string userKey = "user";
-	private const string tokenKey = "token";
 
 	/// <summary>
 	/// 사용자 로그인 및 토큰 발급
 	/// </summary>
 	[HttpGet]
-	public async Task<IActionResult> GetUser(string id) => 
+	public async Task<ActionResult<UserAndTokenResponse>> GetUser(string id) => 
 		await GetUserAsync(id);
 	
 	/// <summary>
 	/// 에디터 전용 토큰 발급
 	/// </summary>
 	[HttpGet]
-	public async Task<IActionResult> GetEditorAccessToken(string email) =>
+	public async Task<ActionResult<StringResponse>> GetEditorAccessToken(string email) =>
 		await GetEditorAccessTokenAsync(email);
 
 	/// <summary>
 	/// 리프레시 토큰을 통한 재발급
 	/// </summary>
 	[HttpGet, ApiAuthorize(Role.User)]
-	public async Task<IActionResult> GetRefreshAccessToken(string refreshToken) => 
+	public async Task<TokenResponse> GetRefreshAccessToken(string refreshToken) => 
 		await GetRefreshAccessTokenAsync(refreshToken);
 	
-	private async Task<IActionResult> GetUserAsync(string id)
+	private async Task<ActionResult<UserAndTokenResponse>> GetUserAsync(string id)
 	{
 		TokenResponse token;
 		UserResponse user;
@@ -77,36 +74,46 @@ public class AuthenticationController : ControllerBase
 		{
 			user = querySnapshot.Documents[0].ToDictionary().ToConvert<UserResponse>();
 			await Redis.SetUserAsync(user);
-			
-			return new Dictionary<string, object>
+
+			return new UserAndTokenResponse
 			{
-				{ userKey, user },
-				{ tokenKey, token }
-			}.ToResponse();
+				Social = user.Social,
+				Information = user.Information,
+
+				AccessToken = token.AccessToken,
+				RefreshToken = token.RefreshToken,
+				AccessTokenExpire = token.AccessTokenExpire,
+				RefreshTokenExpire = token.RefreshTokenExpire
+			};
 		}
 		
 		// 새로운 사용자 데이터 저장
 		await FirebaseSetting.UserCollection?.Document(id)?.SetAsync(user.ToDocument());
 		await Redis.SetUserAsync(user);
 		
-		return new Dictionary<string, object>
+		return new UserAndTokenResponse
 		{
-			{ userKey, user.ToResponse() },
-			{ tokenKey, token }
-		}.ToResponse();
+			Social = user.Social,
+			Information = user.Information,
+
+			AccessToken = token.AccessToken,
+			RefreshToken = token.RefreshToken,
+			AccessTokenExpire = token.AccessTokenExpire,
+			RefreshTokenExpire = token.RefreshTokenExpire
+		};
 	}
 	
-	private Task<IActionResult> GetEditorAccessTokenAsync(string email)
+	private Task<ActionResult<StringResponse>> GetEditorAccessTokenAsync(string email)
 	{
-		var completionSource = new TaskCompletionSource<IActionResult>();
+		var completionSource = new TaskCompletionSource<ActionResult<StringResponse>>();
 		
 		// 사용자 유효성 검사
 		try
 		{
 			email = HttpUtility.UrlDecode(email.Decryption());
-			
+
 			if (Authorization.Administrators.Contains(email))
-				completionSource.SetResult(GenerateAdministratorTokenAsync().ToResponse());
+				completionSource.SetResult(new StringResponse(GenerateAdministratorTokenAsync()));
 			else
 				completionSource.SetResult(BadRequest());
 		}
@@ -118,14 +125,13 @@ public class AuthenticationController : ControllerBase
 		return completionSource.Task;
 	}
 
-	private Task<IActionResult> GetRefreshAccessTokenAsync(string refreshToken)
+	private Task<TokenResponse> GetRefreshAccessTokenAsync(string refreshToken)
 	{
-		var completionSource = new TaskCompletionSource<IActionResult>();
-		
-		if (!JwtAuthentication.RefreshTokens.ContainsKey(refreshToken))
-			completionSource.SetResult(BadRequest());
-		
-		completionSource.SetResult(RegenerateUserToken(Authorization.GetUserId(Request), refreshToken).ToResponse());
+		var completionSource = new TaskCompletionSource<TokenResponse>();
+		completionSource.SetResult(JwtAuthentication.RefreshTokens.ContainsKey(refreshToken)
+			                           ? RegenerateUserToken(Authorization.GetUserId(Request), refreshToken)
+			                           : null);
+
 		return completionSource.Task;
 	}
 	

@@ -23,39 +23,6 @@ public static class Extension
 		JsonConvert.DeserializeObject<T>(value);
 
 #endregion
-
-#region Response
-
-	/// <summary>
-	/// API 데이터 반환
-	/// </summary>
-	public static ContentResult ToResponse(this string message, ApiErrorType type = 0) => Response.Return((int)type, message).ToResult();
-
-	/// <summary>
-	/// API 데이터 반환
-	/// </summary>
-	public static ContentResult ToResponse<T>(this IEnumerable<T> message, ApiErrorType type = 0) => Response.Return((int)type, message).ToResult();
-
-	/// <summary>
-	/// API 데이터 반환
-	/// </summary>
-	public static ContentResult ToResponse(this IDictionary<string, object> snapshot, ApiErrorType type = 0) => Response.Return((int)type, snapshot).ToResult();
-
-	/// <summary>
-	/// API 데이터 반환
-	/// </summary>
-	public static ContentResult ToResponse<T>(this T value, ApiErrorType type = 0) where T : IResponse => Response.Return((int)type, value).ToResult();
-		
-	private static ContentResult ToResult(this Response response)
-	{
-		return new ContentResult
-		{
-			Content = JsonConvert.SerializeObject(response),
-			ContentType = "application/json"
-		};
-	}
-
-#endregion
 	
 #region Firestore
 

@@ -8,10 +8,10 @@ namespace Redbean.Api.Controllers;
 public class UserController : ControllerBase
 {
 	[HttpPost, ApiAuthorize(Role.User)]
-	public async Task<IActionResult> PostUserNickname(string nickname) => 
+	public async Task<UserResponse> PostUserNickname(string nickname) => 
 		await PostUserNicknameAsync(nickname);
 
-	private async Task<IActionResult> PostUserNicknameAsync(string nickname)
+	private async Task<UserResponse> PostUserNicknameAsync(string nickname)
 	{
 		var user = await Request.GetRequestUser();
 
@@ -19,6 +19,6 @@ public class UserController : ControllerBase
 		await Redis.SetUserAsync(user);
 		
 		await FirebaseSetting.UserCollection?.Document(user.Social.Id)?.SetAsync(user.ToDocument());
-		return Ok();
+		return user;
 	}
 }

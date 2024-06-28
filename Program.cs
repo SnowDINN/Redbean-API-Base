@@ -48,8 +48,8 @@ builder.Services.AddAuthentication(options =>
 			ValidateIssuerSigningKey = true
 		};
 	});
-builder.Services.AddControllersWithViews();
-builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddControllersWithViews().AddNewtonsoftJson();
+builder.Services.AddSwaggerGenNewtonsoftSupport();
 builder.Services.AddSwaggerGen(options =>
 {
 	options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme

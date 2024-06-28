@@ -12,23 +12,23 @@ public class ConfigController : ControllerBase
 	/// 테이블 구성 데이터
 	/// </summary>
 	[HttpGet, ApiAuthorize(Role.Administrator)]
-	public async Task<IActionResult> GetTableConfig() => 
+	public async Task<TableConfigResponse> GetTableConfig() => 
 		await GetTableConfigAsync();
 	
 	/// <summary>
 	/// 앱 업데이트 버전 변경
 	/// </summary>
 	[HttpPost, ApiAuthorize(Role.Administrator)]
-	public async Task<IActionResult> PostAppVersion(string version, int type) => 
+	public async Task<AppVersionResponse> PostAppVersion(string version, int type) => 
 		await PostVersionAsync((MobileType)type, version);
 
-	private async Task<IActionResult> GetTableConfigAsync()
+	private async Task<TableConfigResponse> GetTableConfigAsync()
 	{
 		var appConfigResponse = await Redis.GetValueAsync<TableConfigResponse>(RedisKey.TABLE_CONFIG);
-		return appConfigResponse.ToResponse();
+		return appConfigResponse;
 	}
 	
-	private async Task<IActionResult> PostVersionAsync(MobileType type, string version)
+	private async Task<AppVersionResponse> PostVersionAsync(MobileType type, string version)
 	{
 		var appConfigResponse = await Redis.GetValueAsync<AppConfigResponse>(RedisKey.APP_CONFIG);
 		var appVersionResponse = new AppVersionResponse
@@ -50,6 +50,6 @@ public class ConfigController : ControllerBase
 		}
 		
 		await FirebaseSetting.AppConfigDocument?.SetAsync(appConfigResponse.ToDocument());
-		return appVersionResponse.ToResponse();
+		return appVersionResponse;
 	}
 }

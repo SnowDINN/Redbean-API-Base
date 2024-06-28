@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using Microsoft.AspNetCore.Mvc;
-using Redbean.Extension;
 
 namespace Redbean.Api.Controllers;
 
@@ -12,24 +11,21 @@ public class CommonController : ControllerBase
 	/// 앱 구성 데이터
 	/// </summary>
 	[HttpGet]
-	public async Task<IActionResult> GetAppConfig() =>
+	public async Task<AppConfigResponse> GetAppConfig() =>
 		await GetAppConfigAsync();
 	
 	/// <summary>
 	/// 테이블 데이터
 	/// </summary>
 	[HttpGet, ApiAuthorize(Role.User)]
-	public Task<IActionResult> GetTable() =>
+	public Task<DictionaryResponse> GetTable() =>
 		GetTableAsync($"Table/{Authorization.GetVersion(Request)}/");
 	
 	
-	private async Task<IActionResult> GetAppConfigAsync()
-	{
-		var appConfigResponse = await Redis.GetValueAsync<AppConfigResponse>(RedisKey.APP_CONFIG);
-		return appConfigResponse.ToResponse();
-	}
+	private async Task<AppConfigResponse> GetAppConfigAsync() =>
+		await Redis.GetValueAsync<AppConfigResponse>(RedisKey.APP_CONFIG);
 	
-	private async Task<IActionResult> GetTableAsync(string path)
+	private async Task<DictionaryResponse> GetTableAsync(string path)
 	{
 		var dictionary = new Dictionary<string, object>();
 		
@@ -45,6 +41,6 @@ public class CommonController : ControllerBase
 			dictionary.Add(tableName, Encoding.UTF8.GetString(memoryStream.ToArray()));
 		}
 
-		return dictionary.ToResponse();
+		return new DictionaryResponse(dictionary);
 	}
 }
