@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Redbean.Extension;
-using Redbean.MVP.Content;
 
 namespace Redbean.Api.Controllers;
 
