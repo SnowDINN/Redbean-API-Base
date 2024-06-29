@@ -21,6 +21,41 @@ public static class Extension
 	/// </summary>
 	public static T ToConvert<T>(this string value) where T : IResponse =>
 		JsonConvert.DeserializeObject<T>(value);
+	
+	public static ContentResult ToPublish<T>(this T value, int errorCode = 0) where T : IResponse
+	{
+		var response = Response.Default;
+		response.ErrorCode = errorCode;
+		response.Value = value;
+		
+		if (errorCode == 0)
+			return new ContentResult
+			{
+				Content = JsonConvert.SerializeObject(response),
+				ContentType = "application/json"
+			};
+		
+		response.Value = default;
+		return new ContentResult
+		{
+			Content = JsonConvert.SerializeObject(response),
+			ContentType = "application/json"
+		};
+
+	}
+
+	public static ContentResult ToPublishCode(this ControllerBase controllerBase, int errorCode = 0)
+	{
+		var response = Response.Default;
+		response.ErrorCode = errorCode;
+		response.Value = default;
+		
+		return new ContentResult
+		{
+			Content = JsonConvert.SerializeObject(response),
+			ContentType = "application/json"
+		};
+	}
 
 #endregion
 	

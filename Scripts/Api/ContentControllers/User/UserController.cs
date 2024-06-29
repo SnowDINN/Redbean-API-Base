@@ -7,11 +7,11 @@ namespace Redbean.Api.Controllers;
 [Route("[controller]/[action]")]
 public class UserController : ControllerBase
 {
-	[HttpPost, ApiAuthorize(Role.User)]
-	public async Task<UserResponse> PostUserNickname(string nickname) => 
+	[HttpPost, HttpSchema(typeof(UserResponse)), HttpAuthorize(Role.User)]
+	public async Task<IActionResult> PostUserNickname(string nickname) => 
 		await PostUserNicknameAsync(nickname);
 
-	private async Task<UserResponse> PostUserNicknameAsync(string nickname)
+	private async Task<IActionResult> PostUserNicknameAsync(string nickname)
 	{
 		var user = await Request.GetRequestUser();
 
@@ -19,6 +19,6 @@ public class UserController : ControllerBase
 		await Redis.SetUserAsync(user);
 		
 		await FirebaseSetting.UserCollection?.Document(user.Social.Id)?.SetAsync(user.ToDocument());
-		return user;
+		return user.ToPublish();
 	}
 }
