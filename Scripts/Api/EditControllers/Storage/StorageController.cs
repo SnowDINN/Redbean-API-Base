@@ -12,17 +12,17 @@ public class StorageController : ControllerBase
 	/// 테이블 데이터 업데이트
 	/// </summary>
 	[HttpPost, HttpSchema(typeof(StringArrayResponse)), HttpAuthorize(Role.Administrator)]
-	public Task<IActionResult> PostTableFiles(IFormFile[] tables) => 
-		PostFilesAsync($"Table/{Authorization.GetVersion(Request)}/", tables);
+	public Task<IActionResult> PostTableFiles(AppUploadFilesRequest requestBody) => 
+		PostFilesAsync($"Table/{Authorization.GetVersion(Request)}/", requestBody.Files);
 
 	/// <summary>
 	/// 번들 데이터 업데이트
 	/// </summary>
 	[HttpPost, HttpSchema(typeof(StringArrayResponse)), HttpAuthorize(Role.Administrator)]
-	public Task<IActionResult> PostBundleFiles(int type, IFormFile[] bundles) => 
-		PostFilesAsync($"Bundle/{Authorization.GetVersion(Request)}/{(MobileType)type}/", bundles);
+	public Task<IActionResult> PostBundleFiles(AppUploadFilesRequest requestBody) => 
+		PostFilesAsync($"Bundle/{Authorization.GetVersion(Request)}/{requestBody.Type}/", requestBody.Files);
 
-	private async Task<IActionResult> PostFilesAsync(string path, IEnumerable<IFormFile> files)
+	private async Task<IActionResult> PostFilesAsync(string path, IEnumerable<RequestFile> files)
 	{
 		await DeleteFiles(path);
 
@@ -37,7 +37,8 @@ public class StorageController : ControllerBase
 				CacheControl = "no-store",
 			};
 
-			await FirebaseSetting.Storage?.UploadObjectAsync(obj, file.OpenReadStream());	
+			using var stream = new MemoryStream(file.FileData);
+			await FirebaseSetting.Storage?.UploadObjectAsync(obj, stream);	
 		}
 		
 		return new StringArrayResponse(files.Select(_ => _.FileName)).ToPublish();
