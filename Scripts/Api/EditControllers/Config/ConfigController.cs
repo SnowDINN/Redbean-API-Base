@@ -18,8 +18,8 @@ public class ConfigController : ControllerBase
 	/// 앱 업데이트 버전 변경
 	/// </summary>
 	[HttpPost, HttpSchema(typeof(AppVersionResponse)), HttpAuthorize(Role.Administrator)]
-	public async Task<IActionResult> PostAppVersion(string version, int type) => 
-		await PostVersionAsync((MobileType)type, version);
+	public async Task<IActionResult> PostAppVersion([FromBody] AppVersionRequest requestBody) => 
+		await PostVersionAsync(requestBody.Type, requestBody.Version);
 
 	private async Task<IActionResult> GetTableConfigAsync()
 	{
