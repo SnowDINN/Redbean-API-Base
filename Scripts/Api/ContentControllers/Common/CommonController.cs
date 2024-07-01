@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Redbean.Extension;
 
 namespace Redbean.Api.Controllers;
@@ -20,31 +19,12 @@ public class CommonController : ControllerBase
 	/// </summary>
 	[HttpGet, HttpSchema(typeof(TableResponse)), HttpAuthorize(Role.User)]
 	public async Task<IActionResult> GetTable() =>
-		await GetTableAsync($"Table/{Authorization.GetVersion(Request)}/");
+		await GetTableAsync();
 
 
 	private async Task<IActionResult> GetAppConfigAsync() =>
 		(await Redis.GetValueAsync<AppConfigResponse>(RedisKey.APP_CONFIG)).ToPublish();
 
-	private async Task<IActionResult> GetTableAsync(string path)
-	{
-		var dictionary = new Dictionary<string, object>();
-		
-		var objects = FirebaseSetting.Storage?.ListObjects(FirebaseSetting.StorageBucket, path);
-		foreach (var obj in objects)
-		{
-			using var memoryStream = new MemoryStream();
-			var table = await FirebaseSetting.Storage?.DownloadObjectAsync(obj, memoryStream);
-
-			var fileName = table.Name.Split('/').Last();
-			var tableName = fileName.Split('.').First();
-			
-			dictionary.Add(tableName, Encoding.UTF8.GetString(memoryStream.ToArray()));
-		}
-
-		return new TableResponse
-		{
-			Table = dictionary
-		}.ToPublish();
-	}
+	private async Task<IActionResult> GetTableAsync() =>
+		(await Redis.GetValueAsync<TableResponse>(RedisKey.TABLE)).ToPublish();
 }

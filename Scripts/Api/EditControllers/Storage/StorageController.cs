@@ -24,12 +24,12 @@ public class StorageController : ControllerBase
 
 	private async Task<IActionResult> PostTablesAsync(string path, IEnumerable<RequestFile> files)
 	{
+		var tableUploadRequest = await PostFilesAsync(path, files);
 		var tableConfigResponse = await Redis.GetValueAsync<TableConfigResponse>(RedisKey.TABLE_CONFIG);
 		tableConfigResponse.UpdateTime = DateTime.UtcNow;
 		
 		await FirebaseSetting.TableConfigDocument?.SetAsync(tableConfigResponse.ToDocument());
-		
-		return await PostFilesAsync(path, files);
+		return tableUploadRequest;
 	}
 	
 	private async Task<IActionResult> PostFilesAsync(string path, IEnumerable<RequestFile> files)

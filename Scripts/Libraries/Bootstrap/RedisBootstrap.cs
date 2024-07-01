@@ -1,4 +1,5 @@
-﻿using Google.Cloud.Firestore;
+﻿using System.Text;
+using Google.Cloud.Firestore;
 using Newtonsoft.Json;
 using Redbean.Api;
 using Redbean.Extension;
@@ -23,6 +24,20 @@ public class RedisBootstrap : IBootstrap
 		
 		FirebaseSetting.TableConfigDocument.Listen(async _ =>
 		{
+			var table = new Dictionary<string, string>();
+			var objects = FirebaseSetting.Storage?.ListObjects(FirebaseSetting.StorageBucket, "Table/");
+			foreach (var obj in objects)
+			{
+				using var memoryStream = new MemoryStream();
+				var tableFile = await FirebaseSetting.Storage?.DownloadObjectAsync(obj, memoryStream);
+
+				var fileName = tableFile.Name.Split('/').Last();
+				var tableName = fileName.Split('.').First();
+			
+				table.Add(tableName, Encoding.UTF8.GetString(memoryStream.ToArray()));
+			}
+			
+			await Redis.SetValueAsync(RedisKey.TABLE, table);
 			await Redis.SetValueAsync(RedisKey.TABLE_CONFIG, _.ToDictionary());
 		}).Subscribe(listeners);
 	}
