@@ -25,16 +25,16 @@ public class AuthenticationController : ControllerBase
 	/// <summary>
 	/// 에디터 전용 토큰 발급
 	/// </summary>
-	[HttpGet, HttpSchema(typeof(StringResponse))]
-	public async Task<IActionResult> GetEditorAccessToken(string email) =>
-		await GetEditorAccessTokenAsync(email);
+	[HttpPost, HttpSchema(typeof(StringResponse))]
+	public async Task<IActionResult> GetEditorAccessToken([FromBody] StringRequest requestBody) =>
+		await GetEditorAccessTokenAsync(requestBody.Value);
 
 	/// <summary>
 	/// 리프레시 토큰을 통한 재발급
 	/// </summary>
-	[HttpGet, HttpSchema(typeof(TokenResponse)), HttpAuthorize(Role.User)]
-	public async Task<IActionResult> GetRefreshAccessToken(string refreshToken) => 
-		await GetRefreshAccessTokenAsync(refreshToken);
+	[HttpPost, HttpSchema(typeof(TokenResponse)), HttpAuthorize(Role.User)]
+	public async Task<IActionResult> GetRefreshAccessToken([FromBody] StringRequest requestBody) => 
+		await GetRefreshAccessTokenAsync(requestBody.Value);
 	
 	private async Task<IActionResult> GetUserAsync(string id)
 	{

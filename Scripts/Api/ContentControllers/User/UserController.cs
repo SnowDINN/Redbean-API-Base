@@ -8,8 +8,8 @@ namespace Redbean.Api.Controllers;
 public class UserController : ControllerBase
 {
 	[HttpPost, HttpSchema(typeof(UserResponse)), HttpAuthorize(Role.User)]
-	public async Task<IActionResult> PostUserNickname(string nickname) => 
-		await PostUserNicknameAsync(nickname);
+	public async Task<IActionResult> PostUserNickname([FromBody] StringRequest requestBody) => 
+		await PostUserNicknameAsync(requestBody.Value);
 
 	private async Task<IActionResult> PostUserNicknameAsync(string nickname)
 	{
