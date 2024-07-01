@@ -12,21 +12,29 @@ public class StorageController : ControllerBase
 	/// 테이블 데이터 업데이트
 	/// </summary>
 	[HttpPost, HttpSchema(typeof(StringArrayResponse)), HttpAuthorize(Role.Administrator)]
-	public Task<IActionResult> PostTableFiles([FromBody] AppUploadFilesRequest requestBody) => 
-		PostFilesAsync($"Table/{Authorization.GetVersion(Request)}/", requestBody.Files);
+	public async Task<IActionResult> PostTableFiles([FromBody] AppUploadFilesRequest requestBody) => 
+		await PostTablesAsync($"Table/{Authorization.GetVersion(Request)}/", requestBody.Files);
 
 	/// <summary>
 	/// 번들 데이터 업데이트
 	/// </summary>
 	[HttpPost, HttpSchema(typeof(StringArrayResponse)), HttpAuthorize(Role.Administrator)]
-	public Task<IActionResult> PostBundleFiles([FromBody] AppUploadFilesRequest requestBody) => 
-		PostFilesAsync($"Bundle/{Authorization.GetVersion(Request)}/{requestBody.Type}/", requestBody.Files);
+	public async Task<IActionResult> PostBundleFiles([FromBody] AppUploadFilesRequest requestBody) => 
+		await PostFilesAsync($"Bundle/{Authorization.GetVersion(Request)}/{requestBody.Type}/", requestBody.Files);
 
+	private async Task<IActionResult> PostTablesAsync(string path, IEnumerable<RequestFile> files)
+	{
+		var tableConfigResponse = await Redis.GetValueAsync<TableConfigResponse>(RedisKey.TABLE_CONFIG);
+		tableConfigResponse.UpdateTime = DateTime.UtcNow;
+		
+		await FirebaseSetting.TableConfigDocument?.SetAsync(tableConfigResponse.ToDocument());
+		
+		return await PostFilesAsync(path, files);
+	}
+	
 	private async Task<IActionResult> PostFilesAsync(string path, IEnumerable<RequestFile> files)
 	{
 		await DeleteFiles(path);
-
-		
 		
 		foreach (var file in files)
 		{

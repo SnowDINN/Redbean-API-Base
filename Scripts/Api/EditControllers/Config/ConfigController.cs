@@ -21,11 +21,8 @@ public class ConfigController : ControllerBase
 	public async Task<IActionResult> PostAppVersion([FromBody] AppVersionRequest requestBody) => 
 		await PostVersionAsync(requestBody.Type, requestBody.Version);
 
-	private async Task<IActionResult> GetTableConfigAsync()
-	{
-		var appConfigResponse = await Redis.GetValueAsync<TableConfigResponse>(RedisKey.TABLE_CONFIG);
-		return appConfigResponse.ToPublish();
-	}
+	private async Task<IActionResult> GetTableConfigAsync() =>
+		(await Redis.GetValueAsync<TableConfigResponse>(RedisKey.TABLE_CONFIG)).ToPublish();
 	
 	private async Task<IActionResult> PostVersionAsync(MobileType type, string version)
 	{

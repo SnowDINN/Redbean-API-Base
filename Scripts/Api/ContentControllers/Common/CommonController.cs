@@ -19,8 +19,8 @@ public class CommonController : ControllerBase
 	/// 테이블 데이터
 	/// </summary>
 	[HttpGet, HttpSchema(typeof(TableResponse)), HttpAuthorize(Role.User)]
-	public Task<IActionResult> GetTable() =>
-		GetTableAsync($"Table/{Authorization.GetVersion(Request)}/");
+	public async Task<IActionResult> GetTable() =>
+		await GetTableAsync($"Table/{Authorization.GetVersion(Request)}/");
 
 
 	private async Task<IActionResult> GetAppConfigAsync() =>
