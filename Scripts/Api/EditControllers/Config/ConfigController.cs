@@ -8,13 +8,6 @@ namespace Redbean.Api.Controllers;
 public class ConfigController : ControllerBase
 {
 	/// <summary>
-	/// 테이블 구성 데이터
-	/// </summary>
-	[HttpGet, HttpSchema(typeof(TableConfigResponse)), HttpAuthorize(Role.Administrator)]
-	public async Task<IActionResult> GetTableConfig() => 
-		(await Redis.GetValueAsync<TableConfigResponse>(RedisKey.TABLE_CONFIG)).ToPublish();
-	
-	/// <summary>
 	/// 앱 업데이트 버전 변경
 	/// </summary>
 	[HttpPost, HttpSchema(typeof(AppVersionResponse)), HttpAuthorize(Role.Administrator)]

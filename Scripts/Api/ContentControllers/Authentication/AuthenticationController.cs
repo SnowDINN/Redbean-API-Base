@@ -19,8 +19,15 @@ public class AuthenticationController : ControllerBase
 	/// 사용자 로그인 및 토큰 발급
 	/// </summary>
 	[HttpGet, HttpSchema(typeof(UserAndTokenResponse))]
-	public async Task<IActionResult> GetUser(string id) => 
-		await GetUserAsync(id);
+	public async Task<IActionResult> GetAccessTokenAndUser(string id) => 
+		await GetAccessTokenAndUserAsync(id);
+	
+	/// <summary>
+	/// 리프레시 토큰을 통한 재발급
+	/// </summary>
+	[HttpGet, HttpSchema(typeof(TokenResponse)), HttpAuthorize(Role.User)]
+	public async Task<IActionResult> GetAccessTokenRefresh(string token) => 
+		await GetRefreshAccessTokenAsync(token);
 	
 	/// <summary>
 	/// 에디터 전용 토큰 발급
@@ -28,15 +35,8 @@ public class AuthenticationController : ControllerBase
 	[HttpPost, HttpSchema(typeof(StringResponse))]
 	public async Task<IActionResult> PostEditorAccessToken([FromBody] StringRequest requestBody) =>
 		await PostEditorAccessTokenAsync(requestBody.Value);
-
-	/// <summary>
-	/// 리프레시 토큰을 통한 재발급
-	/// </summary>
-	[HttpPost, HttpSchema(typeof(TokenResponse)), HttpAuthorize(Role.User)]
-	public async Task<IActionResult> PostRefreshAccessToken([FromBody] StringRequest requestBody) => 
-		await PostRefreshAccessTokenAsync(requestBody.Value);
 	
-	private async Task<IActionResult> GetUserAsync(string id)
+	private async Task<IActionResult> GetAccessTokenAndUserAsync(string id)
 	{
 		TokenResponse token;
 		UserResponse user;
@@ -44,7 +44,7 @@ public class AuthenticationController : ControllerBase
 		// 사용자 유효성 검사
 		try
 		{
-			id = HttpUtility.UrlDecode(id.Decryption());
+			id = id.Decryption();
 			
 			var userRecord = await FirebaseAuth.DefaultInstance?.GetUserAsync(id);
 			user = new UserResponse
@@ -102,6 +102,16 @@ public class AuthenticationController : ControllerBase
 			RefreshTokenExpire = token.RefreshTokenExpire
 		}.ToPublish();
 	}
+
+	private Task<IActionResult> GetRefreshAccessTokenAsync(string refreshToken)
+	{
+		var completionSource = new TaskCompletionSource<IActionResult>();
+		completionSource.SetResult(JwtAuthentication.RefreshTokens.ContainsKey(refreshToken)
+			                           ? RegenerateUserToken(Authorization.GetUserId(Request), refreshToken).ToPublish()
+			                           : null);
+
+		return completionSource.Task;
+	}
 	
 	private Task<IActionResult> PostEditorAccessTokenAsync(string email)
 	{
@@ -110,27 +120,15 @@ public class AuthenticationController : ControllerBase
 		// 사용자 유효성 검사
 		try
 		{
-			email = HttpUtility.UrlDecode(email.Decryption());
-
-			if (Authorization.Administrators.Contains(email))
-				completionSource.SetResult(new StringResponse(GenerateAdministratorTokenAsync()).ToPublish());
-			else
-				completionSource.SetResult(this.ToPublishCode(1));
+			email = email.Decryption();
+			completionSource.SetResult(Authorization.Administrators.Contains(email)
+				                           ? new StringResponse(GenerateAdministratorTokenAsync()).ToPublish()
+				                           : this.ToPublishCode(1));
 		}
 		catch
 		{
 			completionSource.SetResult(this.ToPublishCode(1));
 		}
-
-		return completionSource.Task;
-	}
-
-	private Task<IActionResult> PostRefreshAccessTokenAsync(string refreshToken)
-	{
-		var completionSource = new TaskCompletionSource<IActionResult>();
-		completionSource.SetResult(JwtAuthentication.RefreshTokens.ContainsKey(refreshToken)
-			                           ? RegenerateUserToken(Authorization.GetUserId(Request), refreshToken).ToPublish()
-			                           : null);
 
 		return completionSource.Task;
 	}

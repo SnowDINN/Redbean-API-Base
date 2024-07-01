@@ -15,6 +15,13 @@ public class CommonController : ControllerBase
 		(await Redis.GetValueAsync<AppConfigResponse>(RedisKey.APP_CONFIG)).ToPublish();
 	
 	/// <summary>
+	/// 테이블 구성 데이터
+	/// </summary>
+	[HttpGet, HttpSchema(typeof(TableConfigResponse)), HttpAuthorize(Role.Administrator)]
+	public async Task<IActionResult> GetTableConfig() => 
+		(await Redis.GetValueAsync<TableConfigResponse>(RedisKey.TABLE_CONFIG)).ToPublish();
+	
+	/// <summary>
 	/// 테이블 데이터
 	/// </summary>
 	[HttpGet, HttpSchema(typeof(TableResponse)), HttpAuthorize(Role.User)]
