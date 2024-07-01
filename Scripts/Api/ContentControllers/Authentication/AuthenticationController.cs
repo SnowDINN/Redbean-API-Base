@@ -26,15 +26,15 @@ public class AuthenticationController : ControllerBase
 	/// 에디터 전용 토큰 발급
 	/// </summary>
 	[HttpPost, HttpSchema(typeof(StringResponse))]
-	public async Task<IActionResult> GetEditorAccessToken([FromBody] StringRequest requestBody) =>
-		await GetEditorAccessTokenAsync(requestBody.Value);
+	public async Task<IActionResult> PostEditorAccessToken([FromBody] StringRequest requestBody) =>
+		await PostEditorAccessTokenAsync(requestBody.Value);
 
 	/// <summary>
 	/// 리프레시 토큰을 통한 재발급
 	/// </summary>
 	[HttpPost, HttpSchema(typeof(TokenResponse)), HttpAuthorize(Role.User)]
-	public async Task<IActionResult> GetRefreshAccessToken([FromBody] StringRequest requestBody) => 
-		await GetRefreshAccessTokenAsync(requestBody.Value);
+	public async Task<IActionResult> PostRefreshAccessToken([FromBody] StringRequest requestBody) => 
+		await PostRefreshAccessTokenAsync(requestBody.Value);
 	
 	private async Task<IActionResult> GetUserAsync(string id)
 	{
@@ -103,7 +103,7 @@ public class AuthenticationController : ControllerBase
 		}.ToPublish();
 	}
 	
-	private Task<IActionResult> GetEditorAccessTokenAsync(string email)
+	private Task<IActionResult> PostEditorAccessTokenAsync(string email)
 	{
 		var completionSource = new TaskCompletionSource<IActionResult>();
 		
@@ -125,7 +125,7 @@ public class AuthenticationController : ControllerBase
 		return completionSource.Task;
 	}
 
-	private Task<IActionResult> GetRefreshAccessTokenAsync(string refreshToken)
+	private Task<IActionResult> PostRefreshAccessTokenAsync(string refreshToken)
 	{
 		var completionSource = new TaskCompletionSource<IActionResult>();
 		completionSource.SetResult(JwtAuthentication.RefreshTokens.ContainsKey(refreshToken)
