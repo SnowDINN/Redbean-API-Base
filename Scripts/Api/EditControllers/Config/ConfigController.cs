@@ -14,6 +14,13 @@ public class ConfigController : ControllerBase
 	public async Task<IActionResult> PostAppVersion([FromBody] AppVersionRequest requestBody) => 
 		await PostVersionAsync(requestBody.Type, requestBody.Version);
 	
+	/// <summary>
+	/// 앱 점검 설정 변경
+	/// </summary>
+	[HttpPost, HttpSchema(typeof(AppConfigResponse))]
+	public async Task<IActionResult> PostAppMaintenance([FromBody] AppMaintenanceRequest requestBody) => 
+		await PostAppMaintenanceAsync(requestBody.Contents, requestBody.StartTime, requestBody.EndTime);
+	
 	private async Task<IActionResult> PostVersionAsync(MobileType type, string version)
 	{
 		var appConfigResponse = await Redis.GetValueAsync<AppConfigResponse>(RedisKey.APP_CONFIG);
@@ -37,5 +44,16 @@ public class ConfigController : ControllerBase
 		
 		await FirebaseSetting.AppConfigDocument?.SetAsync(appConfigResponse.ToDocument());
 		return appVersionResponse.ToPublish();
+	}
+
+	private async Task<IActionResult> PostAppMaintenanceAsync(string contents, DateTime startTime, DateTime endTime)
+	{
+		var appConfigResponse = await Redis.GetValueAsync<AppConfigResponse>(RedisKey.APP_CONFIG);
+		appConfigResponse.Maintenance.Contents = contents;
+		appConfigResponse.Maintenance.Time.StartTime = $"{startTime.Hour}:{startTime.Minute}";
+		appConfigResponse.Maintenance.Time.EndTime = $"{endTime.Hour}:{endTime.Minute}";
+		
+		await FirebaseSetting.AppConfigDocument?.SetAsync(appConfigResponse.ToDocument());
+		return appConfigResponse.ToPublish();
 	}
 }
