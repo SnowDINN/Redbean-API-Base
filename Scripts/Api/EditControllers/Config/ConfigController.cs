@@ -32,13 +32,13 @@ public class ConfigController : ControllerBase
 		switch (type)
 		{
 			case MobileType.Android:
-				appVersionResponse.BeforeVersion = appConfigResponse.Android.Version;
-				appConfigResponse.Android.Version = version;
+				appVersionResponse.BeforeVersion = appConfigResponse.Version.AndroidVersion;
+				appConfigResponse.Version.AndroidVersion = version;
 				break;
 			
 			case MobileType.iOS:
-				appVersionResponse.BeforeVersion = appConfigResponse.iOS.Version;
-				appConfigResponse.iOS.Version = version;
+				appVersionResponse.BeforeVersion = appConfigResponse.Version.iOSVersion;
+				appConfigResponse.Version.iOSVersion = version;
 				break;
 		}
 		
