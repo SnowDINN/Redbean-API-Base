@@ -18,7 +18,7 @@ public class CommonController : ControllerBase
 	/// <summary>
 	/// 테이블 데이터
 	/// </summary>
-	[HttpGet, HttpSchema(typeof(DictionaryResponse)), HttpAuthorize(Role.User)]
+	[HttpGet, HttpSchema(typeof(TableResponse)), HttpAuthorize(Role.User)]
 	public Task<IActionResult> GetTable() =>
 		GetTableAsync($"Table/{Authorization.GetVersion(Request)}/");
 
@@ -42,6 +42,9 @@ public class CommonController : ControllerBase
 			dictionary.Add(tableName, Encoding.UTF8.GetString(memoryStream.ToArray()));
 		}
 
-		return new DictionaryResponse(dictionary).ToPublish();
+		return new TableResponse
+		{
+			Table = dictionary
+		}.ToPublish();
 	}
 }
