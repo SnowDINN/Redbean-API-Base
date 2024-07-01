@@ -26,7 +26,7 @@ public class StorageController : ControllerBase
 	{
 		var tableUploadRequest = await PostFilesAsync(path, files);
 		var tableConfigResponse = await Redis.GetValueAsync<TableConfigResponse>(RedisKey.TABLE_CONFIG);
-		tableConfigResponse.UpdateTime = DateTime.UtcNow;
+		tableConfigResponse.UpdateTime = $"{DateTime.UtcNow}";
 		
 		await FirebaseSetting.TableConfigDocument?.SetAsync(tableConfigResponse.ToDocument());
 		return tableUploadRequest;
