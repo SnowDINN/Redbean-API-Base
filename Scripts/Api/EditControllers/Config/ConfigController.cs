@@ -50,8 +50,8 @@ public class ConfigController : ControllerBase
 	{
 		var appConfigResponse = await Redis.GetValueAsync<AppConfigResponse>(RedisKey.APP_CONFIG);
 		appConfigResponse.Maintenance.Contents = contents;
-		appConfigResponse.Maintenance.Time.StartTime = $"{startTime.Hour}:{startTime.Minute}";
-		appConfigResponse.Maintenance.Time.EndTime = $"{endTime.Hour}:{endTime.Minute}";
+		appConfigResponse.Maintenance.Time.StartTime = $"{startTime:hh:mm}";
+		appConfigResponse.Maintenance.Time.EndTime = $"{endTime:hh:mm}";
 		
 		await FirebaseSetting.AppConfigDocument?.SetAsync(appConfigResponse.ToDocument());
 		return appConfigResponse.ToPublish();
