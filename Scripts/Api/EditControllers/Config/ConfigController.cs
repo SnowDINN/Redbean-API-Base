@@ -12,7 +12,7 @@ public class ConfigController : ControllerBase
 	/// </summary>
 	[HttpGet, HttpSchema(typeof(TableConfigResponse)), HttpAuthorize(Role.Administrator)]
 	public async Task<IActionResult> GetTableConfig() => 
-		await GetTableConfigAsync();
+		(await Redis.GetValueAsync<TableConfigResponse>(RedisKey.TABLE_CONFIG)).ToPublish();
 	
 	/// <summary>
 	/// 앱 업데이트 버전 변경
@@ -20,9 +20,6 @@ public class ConfigController : ControllerBase
 	[HttpPost, HttpSchema(typeof(AppVersionResponse)), HttpAuthorize(Role.Administrator)]
 	public async Task<IActionResult> PostAppVersion([FromBody] AppVersionRequest requestBody) => 
 		await PostVersionAsync(requestBody.Type, requestBody.Version);
-
-	private async Task<IActionResult> GetTableConfigAsync() =>
-		(await Redis.GetValueAsync<TableConfigResponse>(RedisKey.TABLE_CONFIG)).ToPublish();
 	
 	private async Task<IActionResult> PostVersionAsync(MobileType type, string version)
 	{

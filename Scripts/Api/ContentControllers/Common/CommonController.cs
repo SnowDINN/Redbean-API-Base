@@ -12,19 +12,12 @@ public class CommonController : ControllerBase
 	/// </summary>
 	[HttpGet, HttpSchema(typeof(AppConfigResponse))]
 	public async Task<IActionResult> GetAppConfig() =>
-		await GetAppConfigAsync();
+		(await Redis.GetValueAsync<AppConfigResponse>(RedisKey.APP_CONFIG)).ToPublish();
 	
 	/// <summary>
 	/// 테이블 데이터
 	/// </summary>
 	[HttpGet, HttpSchema(typeof(TableResponse)), HttpAuthorize(Role.User)]
 	public async Task<IActionResult> GetTable() =>
-		await GetTableAsync();
-
-
-	private async Task<IActionResult> GetAppConfigAsync() =>
-		(await Redis.GetValueAsync<AppConfigResponse>(RedisKey.APP_CONFIG)).ToPublish();
-
-	private async Task<IActionResult> GetTableAsync() =>
 		(await Redis.GetValueAsync<TableResponse>(RedisKey.TABLE)).ToPublish();
 }
