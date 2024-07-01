@@ -36,8 +36,8 @@ public class RedisBootstrap : IBootstrap
 			
 				table.Add(tableName, Encoding.UTF8.GetString(memoryStream.ToArray()));
 			}
-			
-			await Redis.SetValueAsync(RedisKey.TABLE, table);
+
+			await Redis.SetValueAsync(RedisKey.TABLE, new TableResponse { Table = table });
 			await Redis.SetValueAsync(RedisKey.TABLE_CONFIG, _.ToDictionary());
 		}).Subscribe(listeners);
 	}

@@ -11,7 +11,13 @@ public class FirebaseBootstrap : IBootstrap
 
 	public async Task Setup()
 	{
-		const string environmentPath = "Environment/DEV.json";
+		var environmentPath = "";
+#if REDBEAN_RELEASE
+		environmentPath = "Environment/RELEASE.json";
+#else
+		environmentPath = "Environment/DEV.json";
+#endif
+		
 		Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", environmentPath);
 
 		using var reader = new StreamReader(environmentPath);

@@ -13,7 +13,7 @@ public class StorageController : ControllerBase
 	/// </summary>
 	[HttpPost, HttpSchema(typeof(StringArrayResponse)), HttpAuthorize(Role.Administrator)]
 	public async Task<IActionResult> PostTableFiles([FromBody] AppUploadFilesRequest requestBody) => 
-		await PostTablesAsync($"Table/{Authorization.GetVersion(Request)}/", requestBody.Files);
+		await PostTablesAsync($"Table/", requestBody.Files);
 
 	/// <summary>
 	/// 번들 데이터 업데이트
@@ -29,9 +29,9 @@ public class StorageController : ControllerBase
 		tableConfigResponse.UpdateTime = $"{DateTime.UtcNow}";
 		
 		await FirebaseSetting.TableConfigDocument?.SetAsync(tableConfigResponse.ToDocument());
-		return tableUploadRequest;
-	}
-	
+		return tableUploadRequest
+	;
+    	}
 	private async Task<IActionResult> PostFilesAsync(string path, IEnumerable<RequestFile> files)
 	{
 		await DeleteFiles(path);
