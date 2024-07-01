@@ -13,20 +13,20 @@ public static class Extension
 	/// <summary>
 	/// 클래스 변환
 	/// </summary>
-	public static T ToConvert<T>(this IDictionary<string, object> value) where T : IResponse =>
+	public static T ToConvert<T>(this IDictionary<string, object> value) where T : IApiResponse =>
 		JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(value));
 	
 	/// <summary>
 	/// 클래스 변환
 	/// </summary>
-	public static T ToConvert<T>(this string value) where T : IResponse =>
+	public static T ToConvert<T>(this string value) where T : IApiResponse =>
 		JsonConvert.DeserializeObject<T>(value);
 	
-	public static ContentResult ToPublish<T>(this T value, int errorCode = 0) where T : IResponse
+	public static ContentResult ToPublish<T>(this T value, int errorCode = 0) where T : IApiResponse
 	{
-		var response = Response.Default;
+		var response = ApiResponse.Default;
 		response.ErrorCode = errorCode;
-		response.Value = value;
+		response.Response = value;
 		
 		if (errorCode == 0)
 			return new ContentResult
@@ -35,7 +35,7 @@ public static class Extension
 				ContentType = "application/json"
 			};
 		
-		response.Value = default;
+		response.Response = default;
 		return new ContentResult
 		{
 			Content = JsonConvert.SerializeObject(response),
@@ -46,9 +46,9 @@ public static class Extension
 
 	public static ContentResult ToPublishCode(this ControllerBase controllerBase, int errorCode = 0)
 	{
-		var response = Response.Default;
+		var response = ApiResponse.Default;
 		response.ErrorCode = errorCode;
-		response.Value = default;
+		response.Response = default;
 		
 		return new ContentResult
 		{

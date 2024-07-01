@@ -53,7 +53,7 @@ public class Redis
 	/// <summary>
 	/// Redis 값 호출
 	/// </summary>
-	public static async Task<T> GetValueAsync<T>(string key) where T : IResponse =>
+	public static async Task<T> GetValueAsync<T>(string key) where T : IApiResponse =>
 		JsonConvert.DeserializeObject<T>(await db?.StringGetAsync(key));
 
 	/// <summary>
