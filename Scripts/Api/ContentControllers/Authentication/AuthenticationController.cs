@@ -1,6 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Redbean.Extension;
@@ -45,7 +44,7 @@ public class AuthenticationController : ControllerBase
 		{
 			id = id.Decryption();
 			
-			var userRecord = await FirebaseAuth.DefaultInstance?.GetUserAsync(id);
+			var userRecord = await FirebaseSetting.Authentication?.GetUserAsync(id);
 			user = new UserResponse
 			{
 				Social =
@@ -56,6 +55,10 @@ public class AuthenticationController : ControllerBase
 				Information =
 				{
 					Nickname = userRecord.ProviderData[0].DisplayName
+				},
+				Log =
+				{
+					LastConnected = $"{DateTime.Now}"
 				}
 			};
 			
@@ -66,12 +69,16 @@ public class AuthenticationController : ControllerBase
 			return this.ToPublishCode(1);
 		}
 		
-		// 사용자 데이터베이스 탐색 쿼리
+		// 기존 사용자 탐색
 		var equalTo = FirebaseSetting.UserCollection?.WhereEqualTo("social.id", id)?.Limit(1);
 		var querySnapshot = await equalTo?.GetSnapshotAsync();
 		if (querySnapshot.Count != 0)
 		{
 			user = querySnapshot.Documents[0].ToDictionary().ToConvert<UserResponse>();
+			user.Log.LastConnected = $"{DateTime.Now}";
+			
+			// 마지막 로그인 기록 갱신
+			await FirebaseSetting.UserCollection?.Document(id)?.SetAsync(user.ToDocument());
 			await Redis.SetUserAsync(user);
 
 			return new UserAndTokenResponse
