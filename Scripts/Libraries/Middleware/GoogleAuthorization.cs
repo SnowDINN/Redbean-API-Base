@@ -15,7 +15,7 @@ public class GoogleAuthorization(RequestDelegate next)
 		{
 			if (context.Request.Query.TryGetValue("state", out var value))
 			{
-				if (GoogleAuthentication.State.Remove(value, out var user))
+				if (GoogleAuthentication.Tokens.Remove(value, out var user))
 				{
 					if (user.isAuthentication)
 					{
@@ -35,7 +35,7 @@ public class GoogleAuthorization(RequestDelegate next)
 			};
 			await context.ChallengeAsync(GoogleDefaults.AuthenticationScheme, properties);
 			
-			GoogleAuthentication.State.TryAdd(state, new AuthenticationState
+			GoogleAuthentication.Tokens.TryAdd(state, new MiddlewareMetadata
 			{
 				Expire = DateTime.UtcNow.AddSeconds(ExpiredSecond)
 			});

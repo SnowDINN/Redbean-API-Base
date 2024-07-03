@@ -96,7 +96,7 @@ public class GetAuthorizeController : ControllerBase
 	private Task<IActionResult> GetRefreshAccessTokenAsync(string refreshToken)
 	{
 		var completionSource = new TaskCompletionSource<IActionResult>();
-		completionSource.SetResult(JwtAuthentication.RefreshTokens.ContainsKey(refreshToken)
+		completionSource.SetResult(JwtAuthentication.Tokens.ContainsKey(refreshToken)
 			                           ? RegenerateUserToken(Authorization.GetUserId(Request), refreshToken).ToPublish()
 			                           : null);
 
@@ -117,14 +117,14 @@ public class GetAuthorizeController : ControllerBase
 		                                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(AppSecurity.SecurityKey), SecurityAlgorithms.HmacSha256));
 		var refreshToken = $"{Guid.NewGuid()}".Replace("-", "");
 		
-		JwtAuthentication.RefreshTokens[refreshToken] = new TokenResponse
+		JwtAuthentication.Tokens[refreshToken] = new TokenResponse
 		{
 			AccessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
 			RefreshToken = refreshToken,
 			AccessTokenExpire = accessTokenExpire,
 			RefreshTokenExpire = refreshTokenExpire,
 		};
-		return JwtAuthentication.RefreshTokens[refreshToken];
+		return JwtAuthentication.Tokens[refreshToken];
 	}
 	
 	private TokenResponse RegenerateUserToken(string id, string refreshToken)
@@ -140,13 +140,13 @@ public class GetAuthorizeController : ControllerBase
 		                                       },
 		                                       signingCredentials: new SigningCredentials(new SymmetricSecurityKey(AppSecurity.SecurityKey), SecurityAlgorithms.HmacSha256));
 		
-		JwtAuthentication.RefreshTokens[refreshToken] = new TokenResponse
+		JwtAuthentication.Tokens[refreshToken] = new TokenResponse
 		{
 			AccessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
 			RefreshToken = refreshToken,
 			AccessTokenExpire = accessTokenExpire,
 			RefreshTokenExpire = refreshTokenExpire,
 		};
-		return JwtAuthentication.RefreshTokens[refreshToken];
+		return JwtAuthentication.Tokens[refreshToken];
 	}
 }

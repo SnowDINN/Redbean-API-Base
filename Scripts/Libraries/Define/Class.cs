@@ -6,7 +6,7 @@ public class AuthorizationBody
 	public string Role { get; set; } = "";
 }
 
-public class AuthenticationState
+public class MiddlewareMetadata
 {
 	public DateTime Expire;
 	public bool isAuthentication;

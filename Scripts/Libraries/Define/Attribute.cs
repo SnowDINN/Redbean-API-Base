@@ -13,9 +13,9 @@ public class HttpAuthorizeAttribute : AuthorizeAttribute
 	}
 }
 
-public class HttpSchema : ProducesResponseTypeAttribute
+public class HttpSchemaAttribute : ProducesResponseTypeAttribute
 {
-	public HttpSchema(Type type) : base(type, 200)
+	public HttpSchemaAttribute(Type type) : base(type, 200)
 	{
 		Type = type;
 		StatusCode = 200;

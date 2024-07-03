@@ -48,17 +48,17 @@ public class Authorization
 public class GoogleAuthentication
 {
 	/// <summary>
-	/// Google Authorization State
+	/// Google Middleware Tokens
 	/// </summary>
-	public static readonly Dictionary<string, AuthenticationState> State = new();
+	public static readonly Dictionary<string, MiddlewareMetadata> Tokens = new();
 }
 
 public class JwtAuthentication
 {
 	/// <summary>
-	/// JWT Refresh Tokens
+	/// JWT Tokens
 	/// </summary>
-	public static readonly Dictionary<string, TokenResponse> RefreshTokens = new();
+	public static readonly Dictionary<string, TokenResponse> Tokens = new();
 }
 
 public class Role

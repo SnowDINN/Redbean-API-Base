@@ -13,27 +13,27 @@ public class RxBootstrap : IBootstrap
 #region Refresh Token Expired Validation
 
 		Observable.Interval(TimeSpan.FromSeconds(60))
-			.Where(_ => JwtAuthentication.RefreshTokens.Count > 0)
+			.Where(_ => JwtAuthentication.Tokens.Count > 0)
 			.Subscribe(_ =>
 			{
-				var removes = (from token in JwtAuthentication.RefreshTokens
+				var removes = (from token in JwtAuthentication.Tokens
 				               where token.Value.RefreshTokenExpire < DateTime.UtcNow
 				               select token.Key).ToList();
 
 				foreach (var remove in removes)
-					JwtAuthentication.RefreshTokens.Remove(remove);
+					JwtAuthentication.Tokens.Remove(remove);
 			}).AddTo(disposables);
 		
 		Observable.Interval(TimeSpan.FromSeconds(60))
-			.Where(_ => GoogleAuthentication.State.Count > 0)
+			.Where(_ => GoogleAuthentication.Tokens.Count > 0)
 			.Subscribe(_ =>
 			{
-				var removes = (from state in GoogleAuthentication.State
+				var removes = (from state in GoogleAuthentication.Tokens
 				               where state.Value.Expire < DateTime.UtcNow
 				               select state.Key).ToList();
 
 				foreach (var remove in removes)
-					GoogleAuthentication.State.Remove(remove);
+					GoogleAuthentication.Tokens.Remove(remove);
 			}).AddTo(disposables);
 
 #endregion
