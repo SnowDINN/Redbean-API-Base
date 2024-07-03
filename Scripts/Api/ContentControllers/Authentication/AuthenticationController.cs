@@ -1,6 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Web;
 using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -77,13 +76,8 @@ public class AuthenticationController : ControllerBase
 
 			return new UserAndTokenResponse
 			{
-				Social = user.Social,
-				Information = user.Information,
-
-				AccessToken = token.AccessToken,
-				RefreshToken = token.RefreshToken,
-				AccessTokenExpire = token.AccessTokenExpire,
-				RefreshTokenExpire = token.RefreshTokenExpire
+				User = user,
+				Token = token
 			}.ToPublish();
 		}
 		
@@ -93,13 +87,8 @@ public class AuthenticationController : ControllerBase
 		
 		return new UserAndTokenResponse
 		{
-			Social = user.Social,
-			Information = user.Information,
-
-			AccessToken = token.AccessToken,
-			RefreshToken = token.RefreshToken,
-			AccessTokenExpire = token.AccessTokenExpire,
-			RefreshTokenExpire = token.RefreshTokenExpire
+			User = user,
+			Token = token
 		}.ToPublish();
 	}
 
