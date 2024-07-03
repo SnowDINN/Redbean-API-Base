@@ -50,17 +50,18 @@ public class AuthenticationController : ControllerBase
 				Information =
 				{
 					Id = userRecord.Uid.Encryption(),
-					Nickname = userRecord.ProviderData[0].DisplayName
-				},
-				Social =
-				{
-					Platform = userRecord.ProviderData[0].ProviderId
+					Nickname = userRecord.DisplayName
 				},
 				Log =
 				{
-					LastConnected = $"{DateTime.Now}"
+					LastConnected = $"{DateTime.UtcNow}"
 				}
 			};
+			if (userRecord.ProviderData.Length > 0)
+			{
+				user.Social.Profile = userRecord.ProviderData[0].PhotoUrl;
+				user.Social.Platform = userRecord.ProviderData[0].ProviderId;
+			}
 			
 			token = GenerateUserToken(id);
 		}
@@ -75,7 +76,7 @@ public class AuthenticationController : ControllerBase
 		if (userSnapshot.Exists)
 		{
 			user = userSnapshot.ToDictionary().ToConvert<UserResponse>();
-			user.Log.LastConnected = $"{DateTime.Now}";
+			user.Log.LastConnected = $"{DateTime.UtcNow}";
 			
 			// 마지막 로그인 기록 갱신
 			await FirebaseSetting.UserCollection?.Document(id)?.SetAsync(user.ToDocument());
