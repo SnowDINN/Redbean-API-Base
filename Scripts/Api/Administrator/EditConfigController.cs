@@ -5,7 +5,7 @@ namespace Redbean.Api.Controllers;
 
 [ApiController]
 [Route("[controller]/[action]")]
-public class ConfigController : ControllerBase
+public class EditConfigController : ControllerBase
 {
 	/// <summary>
 	/// 앱 업데이트 버전 변경

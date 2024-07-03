@@ -8,7 +8,7 @@ namespace Redbean.Api.Controllers;
 
 [ApiController]
 [Route("[controller]/[action]")]
-public class AuthenticationController : ControllerBase
+public class GetAuthorizeController : ControllerBase
 {
 	private const long AccessTokenExpireSecond = 1800;
 	private const long RefreshTokenExpireSecond = 2100;
@@ -26,13 +26,6 @@ public class AuthenticationController : ControllerBase
 	[HttpGet, HttpSchema(typeof(TokenResponse)), HttpAuthorize(Role.User)]
 	public async Task<IActionResult> GetAccessTokenRefresh(string token) => 
 		await GetRefreshAccessTokenAsync(token);
-	
-	/// <summary>
-	/// 에디터 전용 토큰 발급
-	/// </summary>
-	[HttpPost, HttpSchema(typeof(StringResponse))]
-	public async Task<IActionResult> PostEditorAccessToken([FromBody] StringRequest requestBody) =>
-		await PostEditorAccessTokenAsync(requestBody.Value);
 	
 	private async Task<IActionResult> GetAccessTokenAndUserAsync(string id)
 	{
@@ -108,38 +101,6 @@ public class AuthenticationController : ControllerBase
 			                           : null);
 
 		return completionSource.Task;
-	}
-	
-	private Task<IActionResult> PostEditorAccessTokenAsync(string email)
-	{
-		var completionSource = new TaskCompletionSource<IActionResult>();
-		
-		// 사용자 유효성 검사
-		try
-		{
-			email = email.Decryption();
-			completionSource.SetResult(Authorization.Administrators.Contains(email)
-				                           ? new StringResponse(GenerateAdministratorTokenAsync()).ToPublish()
-				                           : this.ToPublishCode(1));
-		}
-		catch
-		{
-			completionSource.SetResult(this.ToPublishCode(1));
-		}
-
-		return completionSource.Task;
-	}
-	
-	private string GenerateAdministratorTokenAsync()
-	{
-		var accessToken = new JwtSecurityToken(expires: DateTime.UtcNow.AddSeconds(30),
-		                                       claims: new[]
-		                                       {
-			                                       new Claim(ClaimTypes.Role, Role.Administrator)
-		                                       },
-		                                       signingCredentials: new SigningCredentials(new SymmetricSecurityKey(AppSecurity.SecurityKey), SecurityAlgorithms.HmacSha256));
-		
-		return new JwtSecurityTokenHandler().WriteToken(accessToken);
 	}
 	
 	private TokenResponse GenerateUserToken(string id)

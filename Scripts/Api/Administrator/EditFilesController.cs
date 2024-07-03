@@ -6,7 +6,7 @@ namespace Redbean.Api.Controllers;
 
 [ApiController]
 [Route("[controller]/[action]")]
-public class StorageController : ControllerBase
+public class EditFilesController : ControllerBase
 {
 	/// <summary>
 	/// 테이블 데이터 업데이트

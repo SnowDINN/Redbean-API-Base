@@ -5,7 +5,7 @@ namespace Redbean.Api.Controllers;
 
 [ApiController]
 [Route("[controller]/[action]")]
-public class CommonController : ControllerBase
+public class GetSettingController : ControllerBase
 {
 	/// <summary>
 	/// 앱 구성 데이터
@@ -17,7 +17,7 @@ public class CommonController : ControllerBase
 	/// <summary>
 	/// 테이블 구성 데이터
 	/// </summary>
-	[HttpGet, HttpSchema(typeof(TableConfigResponse)), HttpAuthorize(Role.Administrator)]
+	[HttpGet, HttpSchema(typeof(TableConfigResponse))]
 	public async Task<IActionResult> GetTableConfig() => 
 		(await Redis.GetValueAsync<TableConfigResponse>(RedisKey.TABLE_CONFIG)).ToPublish();
 	
