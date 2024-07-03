@@ -47,14 +47,14 @@ public class AuthenticationController : ControllerBase
 			var userRecord = await FirebaseSetting.Authentication?.GetUserAsync(id);
 			user = new UserResponse
 			{
-				Social =
-				{
-					Id = userRecord.Uid.Encryption(),
-					Platform = userRecord.ProviderData[0].ProviderId
-				},
 				Information =
 				{
+					Id = userRecord.Uid.Encryption(),
 					Nickname = userRecord.ProviderData[0].DisplayName
+				},
+				Social =
+				{
+					Platform = userRecord.ProviderData[0].ProviderId
 				},
 				Log =
 				{
@@ -70,16 +70,16 @@ public class AuthenticationController : ControllerBase
 		}
 		
 		// 기존 사용자 탐색
-		var equalTo = FirebaseSetting.UserCollection?.WhereEqualTo("social.id", id)?.Limit(1);
-		var querySnapshot = await equalTo?.GetSnapshotAsync();
-		if (querySnapshot.Count != 0)
+		var userDocument = FirebaseSetting.UserCollection?.Document(id);
+		var userSnapshot = await userDocument?.GetSnapshotAsync();
+		if (userSnapshot.Exists)
 		{
-			user = querySnapshot.Documents[0].ToDictionary().ToConvert<UserResponse>();
+			user = userSnapshot.ToDictionary().ToConvert<UserResponse>();
 			user.Log.LastConnected = $"{DateTime.Now}";
 			
 			// 마지막 로그인 기록 갱신
 			await FirebaseSetting.UserCollection?.Document(id)?.SetAsync(user.ToDocument());
-			await Redis.SetUserAsync(user);
+			await Redis.SetUserAsync(id, user);
 
 			return new UserAndTokenResponse
 			{
@@ -90,7 +90,7 @@ public class AuthenticationController : ControllerBase
 		
 		// 새로운 사용자 데이터 저장
 		await FirebaseSetting.UserCollection?.Document(id)?.SetAsync(user.ToDocument());
-		await Redis.SetUserAsync(user);
+		await Redis.SetUserAsync(id, user);
 		
 		return new UserAndTokenResponse
 		{

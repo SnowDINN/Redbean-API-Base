@@ -18,12 +18,12 @@ public class UserController : ControllerBase
 
 	private async Task<IActionResult> PostUserNicknameAsync(string nickname)
 	{
+		var userId = Authorization.GetUserId(Request);
 		var user = await Request.GetRequestUser();
-
 		user.Information.Nickname = nickname;
-		await Redis.SetUserAsync(user);
+		await Redis.SetUserAsync(userId, user);
 		
-		await FirebaseSetting.UserCollection?.Document(user.Social.Id)?.SetAsync(user.ToDocument());
+		await FirebaseSetting.UserCollection?.Document(userId)?.SetAsync(user.ToDocument());
 		return this.ToPublishCode();
 	}
 
@@ -33,7 +33,7 @@ public class UserController : ControllerBase
 		await FirebaseSetting.Authentication?.DeleteUserAsync(userId);
 		await FirebaseSetting.UserCollection?.Document(userId).DeleteAsync();
 
-		return Ok();
+		return this.ToPublishCode();
 	}
 
 	private async Task<IActionResult> PostUserPushNotificationAsync(Message message)

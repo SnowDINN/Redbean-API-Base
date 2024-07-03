@@ -90,7 +90,7 @@ public class Redis
 			if (querySnapshot.Count != 0)
 			{
 				var user = querySnapshot.Documents[0].ToDictionary().ToConvert<UserResponse>();
-				await SetUserAsync(user);
+				await SetUserAsync(userId, user);
 			}
 		}
 		
@@ -100,6 +100,6 @@ public class Redis
 	/// <summary>
 	/// Redis 유저 데이터 설정
 	/// </summary>
-	public static async Task SetUserAsync(UserResponse user) => 
-		await db?.StringSetAsync(user.Social.Id, JsonConvert.SerializeObject(user), TimeSpan.FromDays(1));
+	public static async Task SetUserAsync(string userId, UserResponse user) => 
+		await db?.StringSetAsync(userId, JsonConvert.SerializeObject(user), TimeSpan.FromDays(1));
 }
