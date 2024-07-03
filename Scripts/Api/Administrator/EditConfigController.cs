@@ -10,40 +10,34 @@ public class EditConfigController : ControllerBase
 	/// <summary>
 	/// 앱 업데이트 버전 변경
 	/// </summary>
-	[HttpPost, HttpSchema(typeof(AppVersionResponse)), HttpAuthorize(Role.Administrator)]
+	[HttpPost, HttpAuthorize(Role.Administrator)]
 	public async Task<IActionResult> PostAppVersion([FromBody] AppVersionRequest requestBody) => 
 		await PostVersionAsync(requestBody.Type, requestBody.Version);
 	
 	/// <summary>
 	/// 앱 점검 설정 변경
 	/// </summary>
-	[HttpPost, HttpSchema(typeof(AppConfigResponse))]
+	[HttpPost, HttpAuthorize(Role.Administrator)]
 	public async Task<IActionResult> PostAppMaintenance([FromBody] AppMaintenanceRequest requestBody) => 
 		await PostAppMaintenanceAsync(requestBody.Contents, requestBody.StartTime, requestBody.EndTime);
 	
 	private async Task<IActionResult> PostVersionAsync(MobileType type, string version)
 	{
 		var appConfigResponse = await Redis.GetValueAsync<AppConfigResponse>(RedisKey.APP_CONFIG);
-		var appVersionResponse = new AppVersionResponse
-		{
-			AfterVersion = version
-		};
-
+		
 		switch (type)
 		{
 			case MobileType.Android:
-				appVersionResponse.BeforeVersion = appConfigResponse.Version.AndroidVersion;
 				appConfigResponse.Version.AndroidVersion = version;
 				break;
 			
 			case MobileType.iOS:
-				appVersionResponse.BeforeVersion = appConfigResponse.Version.iOSVersion;
 				appConfigResponse.Version.iOSVersion = version;
 				break;
 		}
 		
 		await FirebaseSetting.AppConfigDocument?.SetAsync(appConfigResponse.ToDocument());
-		return appVersionResponse.ToPublish();
+		return this.ToPublishCode();
 	}
 
 	private async Task<IActionResult> PostAppMaintenanceAsync(string contents, DateTime startTime, DateTime endTime)
@@ -54,6 +48,6 @@ public class EditConfigController : ControllerBase
 		appConfigResponse.Maintenance.Time.EndTime = $"{endTime}";
 		
 		await FirebaseSetting.AppConfigDocument?.SetAsync(appConfigResponse.ToDocument());
-		return appConfigResponse.ToPublish();
+		return this.ToPublishCode();
 	}
 }

@@ -14,7 +14,7 @@ public class EditAccessController : ControllerBase
 	/// 에디터 전용 토큰 발급
 	/// </summary>
 	[HttpPost, HttpSchema(typeof(StringResponse))]
-	public async Task<IActionResult> PostEditorAccessToken([FromBody] StringRequest requestBody) =>
+	public async Task<IActionResult> PostAppAccessToken([FromBody] StringRequest requestBody) =>
 		await PostEditorAccessTokenAsync(requestBody.Value);
 	
 	private Task<IActionResult> PostEditorAccessTokenAsync(string email)
