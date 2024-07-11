@@ -4,6 +4,7 @@ using FirebaseAdmin.Messaging;
 using Google.Cloud.Firestore;
 using Google.Cloud.Storage.V1;
 using Newtonsoft.Json.Linq;
+using Redbean.Api;
 
 namespace Redbean;
 
@@ -13,16 +14,9 @@ public class FirebaseBootstrap : IBootstrap
 
 	public async Task Setup()
 	{
-		var environmentPath = "";
-#if REDBEAN_RELEASE
-		environmentPath = "Environment/RELEASE.json";
-#else
-		environmentPath = "Environment/DEV.json";
-#endif
-		
-		Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", environmentPath);
+		Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", EnvironmentSettings.Default.GoogleCloud.Path);
 
-		using var reader = new StreamReader(environmentPath);
+		using var reader = new StreamReader(EnvironmentSettings.Default.GoogleCloud.Path);
 		var json = JObject.Parse(await reader.ReadToEndAsync());
 
 		FirebaseSetting.Id = json["project_id"]?.Value<string>();

@@ -1,9 +1,23 @@
-﻿namespace Redbean;
+﻿using Newtonsoft.Json;
+using Redbean.Api;
+
+namespace Redbean;
 
 public class Bootstrap
 {
 	public static async Task Setup()
 	{
+		var environmentPath = "";
+#if REDBEAN_RELEASE
+		environmentPath = "Environment/Release/Settings.json";
+#else
+		environmentPath = "Environment/Develop/Settings.json";
+#endif
+		
+		using (var stream = new StreamReader(environmentPath))
+			EnvironmentSettings.Default =
+				JsonConvert.DeserializeObject<EnvironmentSettings>(await stream.ReadToEndAsync());
+		
 		var bootstraps = AppDomain.CurrentDomain.GetAssemblies()
 			.SelectMany(x => x.GetTypes())
 			.Where(x => x.FullName != null

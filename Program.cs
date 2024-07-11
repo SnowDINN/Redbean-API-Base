@@ -19,8 +19,8 @@ builder.Services.AddAuthentication(options =>
 	.AddCookie()
 	.AddGoogle(options =>
 	{
-		options.ClientId = "517818090277-b4n17aclsf2ie6e2c06e6fqbqhh9d03u.apps.googleusercontent.com";
-		options.ClientSecret = "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";
+		options.ClientId = EnvironmentSettings.Default.Swagger.OauthClientId;
+		options.ClientSecret = EnvironmentSettings.Default.Swagger.OauthClientSecretId;
 		
 		options.SaveTokens = true;
 		options.Events.OnCreatingTicket = ticket =>
