@@ -29,7 +29,7 @@ builder.Services.AddAuthentication(options =>
 			var query = HttpUtility.ParseQueryString(queryCollection);
 			
 			var email = ticket.Identity.Claims.FirstOrDefault(_ => _.Type == ClaimTypes.Email).Value;
-			GoogleAuthentication.Tokens[query["state"]].isAuthentication = Authorization.Administrators.Contains(email);
+			GoogleAuthentication.Tokens[query["session"]].isAuthentication = Authorization.Administrators.Contains(email);
 
 			return Task.CompletedTask;
 		};

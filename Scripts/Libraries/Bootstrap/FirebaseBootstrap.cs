@@ -16,11 +16,13 @@ public class FirebaseBootstrap : IBootstrap
 	{
 		Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", EnvironmentSettings.Default.GoogleCloud.Path);
 
-		using var reader = new StreamReader(EnvironmentSettings.Default.GoogleCloud.Path);
-		var json = JObject.Parse(await reader.ReadToEndAsync());
+		using (var reader = new StreamReader(EnvironmentSettings.Default.GoogleCloud.Path))
+		{
+			var json = JObject.Parse(await reader.ReadToEndAsync());
 
-		FirebaseSetting.Id = json["project_id"]?.Value<string>();
-		FirebaseSetting.StorageBucket = $"{FirebaseSetting.Id}.appspot.com";
+			FirebaseSetting.Id = json["project_id"]?.Value<string>();
+			FirebaseSetting.StorageBucket = $"{FirebaseSetting.Id}.appspot.com";
+		}
 		
 		FirebaseSetting.Firestore = await FirestoreDb.CreateAsync(FirebaseSetting.Id);
 		FirebaseSetting.Storage = await StorageClient.CreateAsync();

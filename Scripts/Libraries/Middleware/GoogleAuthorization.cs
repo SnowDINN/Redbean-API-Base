@@ -13,7 +13,7 @@ public class GoogleAuthorization(RequestDelegate next)
 	{
 		if (context.Request.Path.StartsWithSegments("/swagger/index.html"))
 		{
-			if (context.Request.Query.TryGetValue("state", out var value))
+			if (context.Request.Query.TryGetValue("session", out var value))
 			{
 				if (GoogleAuthentication.Tokens.Remove(value, out var user))
 				{
@@ -28,14 +28,14 @@ public class GoogleAuthorization(RequestDelegate next)
 				}
 			}
 
-			var state = $"{Guid.NewGuid()}".Replace("-", "");
+			var session = $"{Guid.NewGuid()}".Replace("-", "");
 			var properties = new AuthenticationProperties
 			{
-				RedirectUri = $"/swagger/index.html?state={state}"
+				RedirectUri = $"/swagger/index.html?session={session}"
 			};
 			await context.ChallengeAsync(GoogleDefaults.AuthenticationScheme, properties);
 			
-			GoogleAuthentication.Tokens.TryAdd(state, new MiddlewareMetadata
+			GoogleAuthentication.Tokens.TryAdd(session, new MiddlewareMetadata
 			{
 				Expire = DateTime.UtcNow.AddSeconds(ExpiredSecond)
 			});
