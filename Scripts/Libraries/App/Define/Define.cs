@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
+using Redbean.JWT;
+using Redbean.Middleware;
 
-namespace Redbean.Api;
+namespace Redbean;
 
 public class EnvironmentSettings
 {
@@ -22,14 +24,18 @@ public class GoogleCloudSettings
 	public string Path { get; set; }
 }
 
-public class AuthorizationBody
+public class GoogleAuthentication
 {
-	public string UserId { get; set; } = "";
-	public string Role { get; set; } = "";
+	/// <summary>
+	/// Google Middleware Tokens
+	/// </summary>
+	public static readonly Dictionary<string, GoogleMiddleware> Tokens = new();
 }
 
-public class MiddlewareMetadata
+public class JwtAuthentication
 {
-	public DateTime Expire;
-	public bool isAuthentication;
+	/// <summary>
+	/// JWT Tokens
+	/// </summary>
+	public static readonly Dictionary<string, JwtToken> Tokens = new();
 }

@@ -6,7 +6,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Redbean;
-using Redbean.Api;
+using Redbean.Middleware;
+using Redbean.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAuthorization();
@@ -29,7 +30,7 @@ builder.Services.AddAuthentication(options =>
 			var query = HttpUtility.ParseQueryString(queryCollection);
 			
 			var email = ticket.Identity.Claims.FirstOrDefault(_ => _.Type == ClaimTypes.Email).Value;
-			GoogleAuthentication.Tokens[query["session"]].isAuthentication = Authorization.Administrators.Contains(email);
+			GoogleAuthentication.Tokens[query["session"]].isAuthentication = SecurityRole.AdministratorEmails.Contains(email);
 
 			return Task.CompletedTask;
 		};
@@ -52,15 +53,15 @@ builder.Services.AddControllersWithViews().AddNewtonsoftJson();
 builder.Services.AddSwaggerGenNewtonsoftSupport();
 builder.Services.AddSwaggerGen(options =>
 {
-	options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
+	options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
 	{
 		Name = "Authorization",
 		In = ParameterLocation.Header,
 		Type = SecuritySchemeType.Http,
-		Scheme = JwtBearerDefaults.AuthenticationScheme
+		Scheme = "Bearer"
 	});
 	
-	options.AddSecurityDefinition(AppDefaults.VersionScheme, new OpenApiSecurityScheme
+	options.AddSecurityDefinition("Version", new OpenApiSecurityScheme
 	{
 		Name = "Version",
 		In = ParameterLocation.Header,
@@ -75,7 +76,7 @@ builder.Services.AddSwaggerGen(options =>
 				Reference = new OpenApiReference
 				{
 					Type = ReferenceType.SecurityScheme,
-					Id = JwtBearerDefaults.AuthenticationScheme
+					Id = "Bearer"
 				}
 			},
 			Array.Empty<string>()
@@ -86,7 +87,7 @@ builder.Services.AddSwaggerGen(options =>
 				Reference = new OpenApiReference
 				{
 					Type = ReferenceType.SecurityScheme,
-					Id = AppDefaults.VersionScheme
+					Id = "Version"
 				}
 			},
 			Array.Empty<string>()
@@ -105,7 +106,7 @@ app.MapControllers();
 if (app.Environment.IsDevelopment())
 {
 	// Swagger Authorization
-	app.UseMiddleware<GoogleAuthorization>();
+	app.UseMiddleware<GoogleAuthenticationMiddleware>();
 	
 	app.UseSwagger();
 	app.UseSwaggerUI();

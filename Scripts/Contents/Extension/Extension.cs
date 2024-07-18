@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Redbean.Api;
+using Redbean.JWT;
+using Redbean.Redis;
 
 namespace Redbean.Extension;
 
@@ -23,6 +25,28 @@ public static class Extension
 		JsonConvert.DeserializeObject<T>(value);
 	
 	public static ContentResult ToPublish<T>(this T value, int errorCode = 0) where T : IApiResponse
+	{
+		var response = ApiResponse.Default;
+		response.ErrorCode = errorCode;
+		response.Response = value;
+		
+		if (errorCode == 0)
+			return new ContentResult
+			{
+				Content = JsonConvert.SerializeObject(response),
+				ContentType = "application/json"
+			};
+		
+		response.Response = default;
+		return new ContentResult
+		{
+			Content = JsonConvert.SerializeObject(response),
+			ContentType = "application/json"
+		};
+
+	}
+	
+	public static ContentResult ToJsonPublish<T>(this T value, int errorCode = 0)
 	{
 		var response = ApiResponse.Default;
 		response.ErrorCode = errorCode;
@@ -64,7 +88,7 @@ public static class Extension
 	/// <summary>
 	/// Firestore 리스너 구독
 	/// </summary>
-	public static void Subscribe(this FirestoreChangeListener listener, List<FirestoreChangeListener> list) =>
+	public static void AddTo(this FirestoreChangeListener listener, List<FirestoreChangeListener> list) =>
 		list.Add(listener);
 	
 	/// <summary>
@@ -102,8 +126,8 @@ public static class Extension
 
 #region User
 
-	public static async Task<UserResponse> GetRequestUser(this HttpRequest request) =>
-		await Redis.GetUserAsync(Authorization.GetUserId(request));
+	public static async Task<UserResponse> GetUser(this ControllerBase controller) =>
+		await RedisContainer.GetUserAsync(controller.GetUserId().Decryption());
 
 #endregion
 }

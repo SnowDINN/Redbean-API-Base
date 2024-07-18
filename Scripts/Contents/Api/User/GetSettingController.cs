@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Redbean.Extension;
+using Redbean.Redis;
+using Redbean.Security;
 
 namespace Redbean.Api.Controllers;
 
@@ -12,19 +14,19 @@ public class GetSettingController : ControllerBase
 	/// </summary>
 	[HttpGet, HttpSchema(typeof(AppConfigResponse))]
 	public async Task<IActionResult> GetAppConfig() =>
-		(await Redis.GetValueAsync<AppConfigResponse>(RedisKey.APP_CONFIG)).ToPublish();
+		(await RedisContainer.GetValueAsync<AppConfigResponse>(RedisKey.APP_CONFIG)).ToPublish();
 	
 	/// <summary>
 	/// 테이블 구성 데이터
 	/// </summary>
 	[HttpGet, HttpSchema(typeof(TableConfigResponse))]
 	public async Task<IActionResult> GetTableConfig() => 
-		(await Redis.GetValueAsync<TableConfigResponse>(RedisKey.TABLE_CONFIG)).ToPublish();
+		(await RedisContainer.GetValueAsync<TableConfigResponse>(RedisKey.TABLE_CONFIG)).ToPublish();
 	
 	/// <summary>
 	/// 테이블 데이터
 	/// </summary>
-	[HttpGet, HttpSchema(typeof(TableResponse)), HttpAuthorize(Role.User)]
+	[HttpGet, HttpSchema(typeof(TableResponse)), HttpAuthorize(SecurityRole.User)]
 	public async Task<IActionResult> GetTable() =>
-		(await Redis.GetValueAsync<TableResponse>(RedisKey.TABLE)).ToPublish();
+		(await RedisContainer.GetValueAsync<TableResponse>(RedisKey.TABLE)).ToPublish();
 }

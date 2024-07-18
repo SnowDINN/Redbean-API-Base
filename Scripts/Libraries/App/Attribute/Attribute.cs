@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Redbean.Api;
+namespace Redbean;
 
 public class HttpAuthorizeAttribute : AuthorizeAttribute
 {

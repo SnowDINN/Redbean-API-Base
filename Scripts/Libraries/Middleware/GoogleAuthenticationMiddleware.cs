@@ -1,11 +1,10 @@
 ﻿using System.Net;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
-using Redbean.Api;
 
-namespace Redbean;
+namespace Redbean.Middleware;
 
-public class GoogleAuthorization(RequestDelegate next)
+public class GoogleAuthenticationMiddleware(RequestDelegate next)
 {
 	private const int ExpiredSecond = 300;
 
@@ -35,7 +34,7 @@ public class GoogleAuthorization(RequestDelegate next)
 			};
 			await context.ChallengeAsync(GoogleDefaults.AuthenticationScheme, properties);
 			
-			GoogleAuthentication.Tokens.TryAdd(session, new MiddlewareMetadata
+			GoogleAuthentication.Tokens.TryAdd(session, new GoogleMiddleware
 			{
 				Expire = DateTime.UtcNow.AddSeconds(ExpiredSecond)
 			});
