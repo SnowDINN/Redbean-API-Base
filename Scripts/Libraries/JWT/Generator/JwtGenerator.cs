@@ -1,11 +1,9 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
-using Redbean.Security;
 
 namespace Redbean.JWT;
 
-public class JwtGenerator
+public class JwtGenerator : JwtPermission
 {
 	private const long AccessTokenExpireSecond = 1800;
 	private const long RefreshTokenExpireSecond = 2100;
@@ -15,9 +13,9 @@ public class JwtGenerator
 		var accessToken = new JwtSecurityToken(expires: DateTime.UtcNow.AddSeconds(30),
 		                                       claims: new[]
 		                                       {
-			                                       new Claim(ClaimTypes.Role, SecurityRole.Administrator)
+			                                       new Claim(ClaimTypes.Role, GetPermission(PermissionType.Administrator))
 		                                       },
-		                                       signingCredentials: new SigningCredentials(new SymmetricSecurityKey(AppSecurity.SecurityKey), SecurityAlgorithms.HmacSha256));
+		                                       signingCredentials: JwtSecurity.Credentials);
 		
 		return new JwtSecurityTokenHandler().WriteToken(accessToken);
 	}
@@ -31,19 +29,19 @@ public class JwtGenerator
 		                                       claims: new[]
 		                                       {
 			                                       new Claim(ClaimTypes.NameIdentifier, id),
-			                                       new Claim(ClaimTypes.Role, SecurityRole.User)
+			                                       new Claim(ClaimTypes.Role, GetPermission(PermissionType.User))
 		                                       },
-		                                       signingCredentials: new SigningCredentials(new SymmetricSecurityKey(AppSecurity.SecurityKey), SecurityAlgorithms.HmacSha256));
+		                                       signingCredentials: JwtSecurity.Credentials);
 		var refreshToken = $"{Guid.NewGuid()}".Replace("-", "");
 		
-		JwtAuthentication.Tokens[refreshToken] = new JwtToken
+		AppToken.JwtTokens[refreshToken] = new JwtToken
 		{
 			AccessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
 			RefreshToken = refreshToken,
 			AccessTokenExpire = accessTokenExpire,
 			RefreshTokenExpire = refreshTokenExpire,
 		};
-		return JwtAuthentication.Tokens[refreshToken];
+		return AppToken.JwtTokens[refreshToken];
 	}
 	
 	public static JwtToken RegenerateUserToken(string id, string refreshToken)
@@ -55,17 +53,17 @@ public class JwtGenerator
 		                                       claims: new[]
 		                                       {
 			                                       new Claim(ClaimTypes.NameIdentifier, id),
-			                                       new Claim(ClaimTypes.Role, SecurityRole.User)
+			                                       new Claim(ClaimTypes.Role, GetPermission(PermissionType.User))
 		                                       },
-		                                       signingCredentials: new SigningCredentials(new SymmetricSecurityKey(AppSecurity.SecurityKey), SecurityAlgorithms.HmacSha256));
+		                                       signingCredentials: JwtSecurity.Credentials);
 		
-		JwtAuthentication.Tokens[refreshToken] = new JwtToken
+		AppToken.JwtTokens[refreshToken] = new JwtToken
 		{
 			AccessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
 			RefreshToken = refreshToken,
 			AccessTokenExpire = accessTokenExpire,
 			RefreshTokenExpire = refreshTokenExpire,
 		};
-		return JwtAuthentication.Tokens[refreshToken];
+		return AppToken.JwtTokens[refreshToken];
 	}
 }

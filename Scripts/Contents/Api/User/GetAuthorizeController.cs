@@ -3,7 +3,6 @@ using Redbean.Extension;
 using Redbean.Firebase;
 using Redbean.JWT;
 using Redbean.Redis;
-using Redbean.Security;
 
 namespace Redbean.Api.Controllers;
 
@@ -21,7 +20,7 @@ public class GetAuthorizeController : ControllerBase
 	/// <summary>
 	/// 리프레시 토큰을 통한 재발급
 	/// </summary>
-	[HttpGet, HttpSchema(typeof(TokenResponse)), HttpAuthorize(SecurityRole.User)]
+	[HttpGet, HttpSchema(typeof(TokenResponse)), HttpAuthorize(ApiPermission.User)]
 	public async Task<IActionResult> GetAccessTokenRefresh(string token) => 
 		await GetRefreshAccessTokenAsync(token);
 	
@@ -62,16 +61,15 @@ public class GetAuthorizeController : ControllerBase
 		}
 		
 		// 기존 사용자 탐색
-		var userDocument = FirebaseSetting.UserCollection?.Document(id);
-		var userSnapshot = await userDocument?.GetSnapshotAsync();
-		if (userSnapshot.Exists)
+		var userAsync = await FirebaseDatabase.GetUserAsync(id);
+		if (!string.IsNullOrEmpty(userAsync.Information.Id))
 		{
-			user = userSnapshot.ToDictionary().ToConvert<UserResponse>();
+			user = userAsync;
 			user.Log.LastConnected = $"{DateTime.UtcNow}";
 			
 			// 마지막 로그인 기록 갱신
-			await FirebaseSetting.UserCollection?.Document(id)?.SetAsync(user.ToDocument());
-			await RedisContainer.SetUserAsync(id, user);
+			await FirebaseDatabase.SetUserAsync(id, user);
+			await RedisDatabase.SetUserAsync(id, user);
 
 			return new Dictionary<string, object>
 			{
@@ -81,8 +79,8 @@ public class GetAuthorizeController : ControllerBase
 		}
 		
 		// 새로운 사용자 데이터 저장
-		await FirebaseSetting.UserCollection?.Document(id)?.SetAsync(user.ToDocument());
-		await RedisContainer.SetUserAsync(id, user);
+		await FirebaseDatabase.SetUserAsync(id, user);
+		await RedisDatabase.SetUserAsync(id, user);
 		
 		return new Dictionary<string, object>
 		{
@@ -94,7 +92,7 @@ public class GetAuthorizeController : ControllerBase
 	private Task<IActionResult> GetRefreshAccessTokenAsync(string refreshToken)
 	{
 		var completionSource = new TaskCompletionSource<IActionResult>();
-		completionSource.SetResult(JwtAuthentication.Tokens.ContainsKey(refreshToken)
+		completionSource.SetResult(AppToken.JwtTokens.ContainsKey(refreshToken)
 			                           ? JwtGenerator.RegenerateUserToken(this.GetUserId(), refreshToken).ToJsonPublish()
 			                           : this.ToPublishCode(1));
 

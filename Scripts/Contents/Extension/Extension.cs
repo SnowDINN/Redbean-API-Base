@@ -127,7 +127,7 @@ public static class Extension
 #region User
 
 	public static async Task<UserResponse> GetUser(this ControllerBase controller) =>
-		await RedisContainer.GetUserAsync(controller.GetUserId().Decryption());
+		await RedisDatabase.GetUserAsync(controller.GetUserId().Decryption());
 
 #endregion
 }

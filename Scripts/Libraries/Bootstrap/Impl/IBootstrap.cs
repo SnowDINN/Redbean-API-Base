@@ -1,6 +1,6 @@
 ﻿namespace Redbean;
 
-public interface IBootstrap : IDisposable
+public interface IBootstrap
 {
 	/// <summary>
 	/// 실행 순서

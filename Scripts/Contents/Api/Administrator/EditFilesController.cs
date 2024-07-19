@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Redbean.Extension;
 using Redbean.Firebase;
+using Redbean.Firebase.Storage;
 using Redbean.JWT;
 using Redbean.Redis;
-using Redbean.Security;
-using Object = Google.Apis.Storage.v1.Data.Object;
 
 namespace Redbean.Api.Controllers;
 
@@ -15,52 +14,32 @@ public class EditFilesController : ControllerBase
 	/// <summary>
 	/// 테이블 데이터 업데이트
 	/// </summary>
-	[HttpPost, HttpSchema(typeof(StringArrayResponse)), HttpAuthorize(SecurityRole.Administrator)]
+	[HttpPost, HttpSchema(typeof(StringArrayResponse)), HttpAuthorize(ApiPermission.Administrator)]
 	public async Task<IActionResult> PostTableFiles([FromBody] AppUploadFilesRequest requestBody) => 
 		await PostTablesAsync($"Table/", requestBody.Files);
 
 	/// <summary>
 	/// 번들 데이터 업데이트
 	/// </summary>
-	[HttpPost, HttpSchema(typeof(StringArrayResponse)), HttpAuthorize(SecurityRole.Administrator)]
+	[HttpPost, HttpSchema(typeof(StringArrayResponse)), HttpAuthorize(ApiPermission.Administrator)]
 	public async Task<IActionResult> PostBundleFiles([FromBody] AppUploadFilesRequest requestBody) => 
 		await PostFilesAsync($"Bundle/{this.GetVersion()}/{requestBody.Type}/", requestBody.Files);
 
 	private async Task<IActionResult> PostTablesAsync(string path, IEnumerable<RequestFile> files)
 	{
 		var tableUploadRequest = await PostFilesAsync(path, files);
-		var tableConfigResponse = await RedisContainer.GetValueAsync<TableConfigResponse>(RedisKey.TABLE_CONFIG);
+		var tableConfigResponse = await RedisDatabase.GetValueAsync<TableConfigResponse>(RedisKey.TABLE_CONFIG);
 		tableConfigResponse.Update.UpdateTime = $"{DateTime.UtcNow}";
 		
-		await FirebaseSetting.TableConfigDocument?.SetAsync(tableConfigResponse.ToDocument());
+		await FirebaseDatabase.SetTableSettingAsync(tableConfigResponse.ToDocument());
 		return tableUploadRequest
 	;
     	}
 	private async Task<IActionResult> PostFilesAsync(string path, IEnumerable<RequestFile> files)
 	{
-		await DeleteFiles(path);
-		
-		foreach (var file in files)
-		{
-			var obj = new Object
-			{
-				Bucket = FirebaseSetting.StorageBucket,
-				Name = $"{path}{file.FileName}",
-				CacheControl = "no-store",
-			};
-
-			using var stream = new MemoryStream(file.FileData);
-			await FirebaseSetting.Storage?.UploadObjectAsync(obj, stream);	
-		}
+		await FirebaseStorage.DeleteFilesAsync(FirebaseStorage.GetFiles(path));
+		await FirebaseStorage.UploadFilesAsync(path, files);
 		
 		return new StringArrayResponse(files.Select(_ => _.FileName)).ToPublish();
-	}
-	
-	private async Task DeleteFiles(string path)
-	{
-		var objects = FirebaseSetting.Storage?.ListObjects(FirebaseSetting.StorageBucket, path);
-		var objectList = objects?.Select(obj => obj.Name).ToList();
-		foreach (var obj in objectList)
-			await FirebaseSetting.Storage?.DeleteObjectAsync($"{FirebaseSetting.Id}.appspot.com", obj);
 	}
 }

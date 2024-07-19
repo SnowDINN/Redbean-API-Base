@@ -1,13 +1,6 @@
-﻿using System.Text;
+﻿namespace Redbean;
 
-namespace Redbean.Security;
-
-public class AppSecurity
-{
-	public static readonly byte[] SecurityKey = Encoding.ASCII.GetBytes($"{Guid.NewGuid()}".Replace("-", ""));
-}
-
-public class SecurityRole
+public class ApiPermission
 {
 	public static readonly string[] AdministratorEmails = ["mfactory86@gmail.com"];
 	

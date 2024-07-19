@@ -7,7 +7,6 @@ using Redbean.Extension;
 using Redbean.Firebase;
 using Redbean.JWT;
 using Redbean.Redis;
-using Redbean.Security;
 
 namespace Redbean.Api.Controllers;
 
@@ -15,11 +14,11 @@ namespace Redbean.Api.Controllers;
 [Route("[controller]/[action]")]
 public class UserController : ControllerBase
 {
-	[HttpPost, HttpAuthorize(SecurityRole.User)]
+	[HttpPost, HttpAuthorize(ApiPermission.User)]
 	public async Task<IActionResult> PostUserNickname([FromBody] StringRequest requestBody) => 
 		await PostUserNicknameAsync(requestBody.Value);
 
-	[HttpPost, HttpAuthorize(SecurityRole.User)]
+	[HttpPost, HttpAuthorize(ApiPermission.User)]
 	public async Task<IActionResult> PostUserWithdrawal() => 
 		await PostUserWithdrawalAsync();
 
@@ -28,9 +27,9 @@ public class UserController : ControllerBase
 		var userId = this.GetUserId().Decryption();
 		var user = await this.GetUser();
 		user.Information.Nickname = nickname;
-		await RedisContainer.SetUserAsync(userId, user);
+		await RedisDatabase.SetUserAsync(userId, user);
 		
-		await FirebaseSetting.UserCollection?.Document(userId)?.SetAsync(user.ToDocument());
+		await FirebaseDatabase.SetUserAsync(userId, user);
 		return this.ToPublishCode();
 	}
 
@@ -38,7 +37,7 @@ public class UserController : ControllerBase
 	{
 		var userId = this.GetUserId().Decryption();
 		await FirebaseSetting.Authentication?.DeleteUserAsync(userId);
-		await FirebaseSetting.UserCollection?.Document(userId).DeleteAsync();
+		await FirebaseDatabase.DeleteUserAsync(userId);
 
 		return this.ToPublishCode();
 	}

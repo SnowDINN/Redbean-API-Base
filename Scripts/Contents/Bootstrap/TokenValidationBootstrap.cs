@@ -2,49 +2,41 @@
 
 namespace Redbean;
 
-public class RxBootstrap : IBootstrap
+public class TokenValidationBootstrap : IBootstrap
 {
 	private static readonly CompositeDisposable disposables = new();
-	public int ExecutionOrder => 30;
+	public int ExecutionOrder => 40;
 
 	public Task Setup()
 	{
 #region Refresh Token Expired Validation
 
 		Observable.Interval(TimeSpan.FromSeconds(60))
-			.Where(_ => JwtAuthentication.Tokens.Count > 0)
+			.Where(_ => AppToken.JwtTokens.Count > 0)
 			.Subscribe(_ =>
 			{
-				var removes = (from token in JwtAuthentication.Tokens
+				var removes = (from token in AppToken.JwtTokens
 				               where token.Value.RefreshTokenExpire < DateTime.UtcNow
 				               select token.Key).ToList();
 
 				foreach (var remove in removes)
-					JwtAuthentication.Tokens.Remove(remove);
+					AppToken.JwtTokens.Remove(remove);
 			}).AddTo(disposables);
 		
 		Observable.Interval(TimeSpan.FromSeconds(60))
-			.Where(_ => GoogleAuthentication.Tokens.Count > 0)
+			.Where(_ => AppToken.SwaggerSessionTokens.Count > 0)
 			.Subscribe(_ =>
 			{
-				var removes = (from state in GoogleAuthentication.Tokens
+				var removes = (from state in AppToken.SwaggerSessionTokens
 				               where state.Value.Expire < DateTime.UtcNow
 				               select state.Key).ToList();
 
 				foreach (var remove in removes)
-					GoogleAuthentication.Tokens.Remove(remove);
+					AppToken.SwaggerSessionTokens.Remove(remove);
 			}).AddTo(disposables);
 
 #endregion
 		
 		return Task.CompletedTask;
-	}
-
-	public void Dispose()
-	{
-		disposables.Dispose();
-		disposables.Clear();
-
-		GC.SuppressFinalize(this);
 	}
 }

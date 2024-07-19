@@ -1,21 +1,16 @@
 ﻿using Newtonsoft.Json;
 using Redbean.Api;
-using Redbean.Extension;
 using Redbean.Firebase;
 using StackExchange.Redis;
 
 namespace Redbean.Redis;
 
-public class RedisContainer
+public class RedisDatabase
 {
-	public static ConnectionMultiplexer Multiplexer { get; private set; }
-	private static IDatabase db => Multiplexer?.GetDatabase();
-    
-	public static async Task Initialize()
-	{
-		Multiplexer = await ConnectionMultiplexer.ConnectAsync("host.docker.internal:6379");
-	}
-    
+	private static IDatabase db;
+	
+	public static void Initialize(IDatabase db) => RedisDatabase.db = db;
+	
 	/// <summary>
 	/// Redis 값 호출
 	/// </summary>
@@ -36,13 +31,9 @@ public class RedisContainer
 		var redis = await db?.StringGetAsync(userId);
 		if (string.IsNullOrEmpty(redis))
 		{
-			var equalTo = FirebaseSetting.UserCollection?.WhereEqualTo("social.id", userId)?.Limit(1);
-			var querySnapshot = await equalTo?.GetSnapshotAsync();
-			if (querySnapshot.Count != 0)
-			{
-				var user = querySnapshot.Documents[0].ToDictionary().ToConvert<UserResponse>();
+			var user = await FirebaseDatabase.GetUserAsync(userId);
+			if (!string.IsNullOrEmpty(user.Information.Id))
 				await SetUserAsync(userId, user);
-			}
 		}
     		
 		return JsonConvert.DeserializeObject<UserResponse>(await db?.StringGetAsync(userId));

@@ -1,13 +1,13 @@
 ﻿using Newtonsoft.Json;
 using Redbean.JWT;
-using Redbean.Middleware;
+using Redbean.Swagger;
 
 namespace Redbean;
 
-public class EnvironmentSettings
+public class AppEnvironment
 {
 	[JsonIgnore]
-	public static EnvironmentSettings Default { get; set; }
+	public static AppEnvironment Default { get; set; }
 	
 	public SwaggerSettings Swagger { get; set; }
 	public GoogleCloudSettings GoogleCloud { get; set; }
@@ -24,18 +24,15 @@ public class GoogleCloudSettings
 	public string Path { get; set; }
 }
 
-public class GoogleAuthentication
+public class AppToken
 {
 	/// <summary>
-	/// Google Middleware Tokens
+	/// Swagger Session Tokens
 	/// </summary>
-	public static readonly Dictionary<string, GoogleMiddleware> Tokens = new();
-}
-
-public class JwtAuthentication
-{
+	public static readonly Dictionary<string, SwaggerSessionToken> SwaggerSessionTokens = new();
+	
 	/// <summary>
 	/// JWT Tokens
 	/// </summary>
-	public static readonly Dictionary<string, JwtToken> Tokens = new();
+	public static readonly Dictionary<string, JwtToken> JwtTokens = new();
 }

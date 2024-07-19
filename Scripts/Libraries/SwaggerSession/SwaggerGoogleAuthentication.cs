@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 
-namespace Redbean.Middleware;
+namespace Redbean.Swagger;
 
-public class GoogleAuthenticationMiddleware(RequestDelegate next)
+public class SwaggerGoogleAuthentication(RequestDelegate next)
 {
 	private const int ExpiredSecond = 300;
 
@@ -14,7 +14,7 @@ public class GoogleAuthenticationMiddleware(RequestDelegate next)
 		{
 			if (context.Request.Query.TryGetValue("session", out var value))
 			{
-				if (GoogleAuthentication.Tokens.Remove(value, out var user))
+				if (AppToken.SwaggerSessionTokens.Remove(value, out var user))
 				{
 					if (user.isAuthentication)
 					{
@@ -34,7 +34,7 @@ public class GoogleAuthenticationMiddleware(RequestDelegate next)
 			};
 			await context.ChallengeAsync(GoogleDefaults.AuthenticationScheme, properties);
 			
-			GoogleAuthentication.Tokens.TryAdd(session, new GoogleMiddleware
+			AppToken.SwaggerSessionTokens.TryAdd(session, new SwaggerSessionToken
 			{
 				Expire = DateTime.UtcNow.AddSeconds(ExpiredSecond)
 			});

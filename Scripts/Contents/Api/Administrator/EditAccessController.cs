@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Redbean.Extension;
 using Redbean.JWT;
-using Redbean.Security;
 
 namespace Redbean.Api.Controllers;
 
@@ -24,7 +23,7 @@ public class EditAccessController : ControllerBase
 		try
 		{
 			email = email.Decryption();
-			completionSource.SetResult(SecurityRole.AdministratorEmails.Contains(email)
+			completionSource.SetResult(ApiPermission.AdministratorEmails.Contains(email)
 				                           ? new StringResponse(JwtGenerator.GenerateAdministratorTokenAsync()).ToPublish()
 				                           : this.ToPublishCode(1));
 		}
