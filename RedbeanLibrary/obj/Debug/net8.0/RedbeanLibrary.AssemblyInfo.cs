@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RedbeanLibrary")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e755e6604dc988023540c4f2eb68ebd5d888eb33")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
 [assembly: System.Reflection.AssemblyProductAttribute("RedbeanLibrary")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RedbeanLibrary")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
