@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\BoongGod-S.props" />
+</Project>
