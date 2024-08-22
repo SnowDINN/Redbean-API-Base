@@ -15,14 +15,14 @@ public class EditFilesController : ControllerBase
 	/// 테이블 데이터 업데이트
 	/// </summary>
 	[HttpPost, HttpSchema(typeof(StringArrayResponse)), HttpAuthorize(ApiPermission.Administrator)]
-	public async Task<IActionResult> PostTableFiles([FromBody] AppUploadFilesRequest requestBody) => 
+	public async Task<IActionResult> EditTableFiles([FromBody] AppUploadFilesRequest requestBody) => 
 		await PostTablesAsync($"Table/", requestBody.Files);
 
 	/// <summary>
 	/// 번들 데이터 업데이트
 	/// </summary>
 	[HttpPost, HttpSchema(typeof(StringArrayResponse)), HttpAuthorize(ApiPermission.Administrator)]
-	public async Task<IActionResult> PostBundleFiles([FromBody] AppUploadFilesRequest requestBody) => 
+	public async Task<IActionResult> EditBundleFiles([FromBody] AppUploadFilesRequest requestBody) => 
 		await PostFilesAsync($"Bundle/{this.GetVersion()}/{requestBody.Type}/", requestBody.Files);
 
 	private async Task<IActionResult> PostTablesAsync(string path, IEnumerable<RequestFile> files)

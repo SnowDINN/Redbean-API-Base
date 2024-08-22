@@ -13,14 +13,14 @@ public class EditConfigController : ControllerBase
 	/// 앱 업데이트 버전 변경
 	/// </summary>
 	[HttpPost, HttpAuthorize(ApiPermission.Administrator)]
-	public async Task<IActionResult> PostAppVersion([FromBody] AppVersionRequest requestBody) => 
+	public async Task<IActionResult> EditAppVersion([FromBody] AppVersionRequest requestBody) => 
 		await PostVersionAsync(requestBody.Type, requestBody.Version);
 	
 	/// <summary>
 	/// 앱 점검 설정 변경
 	/// </summary>
 	[HttpPost, HttpAuthorize(ApiPermission.Administrator)]
-	public async Task<IActionResult> PostAppMaintenance([FromBody] AppMaintenanceRequest requestBody) => 
+	public async Task<IActionResult> EditAppMaintenance([FromBody] AppMaintenanceRequest requestBody) => 
 		await PostAppMaintenanceAsync(requestBody.Contents, requestBody.StartTime, requestBody.EndTime);
 	
 	private async Task<IActionResult> PostVersionAsync(MobileType type, string version)
