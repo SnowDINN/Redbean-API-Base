@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoongGod-S", "..\BoongGod-S\BoongGod-S\BoongGod-S.csproj", "{5C8D3299-B957-4D14-8203-98BE3AB2B4AF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoongGod-S", "..\BoongGod-S\BoongGod\BoongGod.csproj", "{5C8D3299-B957-4D14-8203-98BE3AB2B4AF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedbeanLibrary", "..\BoongGod-S\RedbeanLibrary\RedbeanLibrary.csproj", "{0DED2597-0992-4D11-8067-DD7B2A89E20A}"
 EndProject
