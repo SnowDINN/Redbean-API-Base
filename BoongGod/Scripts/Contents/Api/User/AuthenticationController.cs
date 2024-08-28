@@ -37,7 +37,7 @@ public class AuthenticationController : ControllerBase
 			if (string.IsNullOrEmpty(findGuestUser.Information.Id))
 			{
 				// 신규 사용자 데이터 저장
-				user.Information.Id = requestBody.id;
+				user.Information.Id = requestBody.id.Encryption();
 				user.Information.Nickname = "GuestUser";
 				user.Social.Platform = "Guest";
 			}
