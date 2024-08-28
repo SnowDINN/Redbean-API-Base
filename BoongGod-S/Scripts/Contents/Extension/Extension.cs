@@ -65,7 +65,6 @@ public static class Extension
 			Content = JsonConvert.SerializeObject(response),
 			ContentType = "application/json"
 		};
-
 	}
 
 	public static ContentResult ToPublishCode(this ControllerBase controllerBase, int errorCode = 0)

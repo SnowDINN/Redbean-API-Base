@@ -1,7 +1,9 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 
 namespace Redbean.Api
 {
+#region User
+
 	public class UserResponse : IApiResponse
 	{
 		[JsonProperty("information")]
@@ -39,5 +41,28 @@ namespace Redbean.Api
 		
 		[JsonProperty("lastPurchased")]
 		public string LastPurchased = string.Empty;
+	}
+
+#endregion
+
+#region Token
+
+	public class TokenResponse : IApiResponse
+	{
+		public string AccessToken = "";
+		public string RefreshToken = "";
+		public DateTime AccessTokenExpire = new();
+		public DateTime RefreshTokenExpire = new();
+	}	
+
+#endregion
+	
+	public class UserAndTokenResponse : IApiResponse
+	{
+		[JsonProperty("user")]
+		public UserResponse User = new();
+
+		[JsonProperty("token")]
+		public TokenResponse Token = new();
 	}
 }

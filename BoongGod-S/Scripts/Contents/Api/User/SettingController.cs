@@ -6,7 +6,7 @@ namespace Redbean.Api.Controllers;
 
 [ApiController]
 [Route("[controller]/[action]")]
-public class GetSettingController : ControllerBase
+public class SettingController : ControllerBase
 {
 	/// <summary>
 	/// 앱 구성 데이터

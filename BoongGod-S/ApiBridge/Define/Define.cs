@@ -12,4 +12,11 @@
 		Android,
 		iOS
 	}
+	
+	public enum AuthenticationType
+	{
+		Guest,
+		Google,
+		Apple,
+	}
 }
