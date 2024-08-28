@@ -21,25 +21,25 @@ public class FirebaseDatabase
 
 	public static async Task<UserResponse> GetGuestUserAsync(string id)
 	{
-		var user = await db.Collection("users_guest").Document(id).GetSnapshotAsync();
+		var user = await db.Collection("account_guest").Document(id).GetSnapshotAsync();
 		return user.Exists ? user.ToDictionary().ToConvert<UserResponse>() : new UserResponse();
 	}
 	
 	public static async Task SetGuestUserAsync(string id, UserResponse user) =>
-		await db.Collection("users_guest").Document(id).SetAsync(user.ToDocument());
+		await db.Collection("account_guest").Document(id).SetAsync(user.ToDocument());
 	
 	public static async Task DeleteGuestUserAsync(string id) =>
-		await db.Collection("users_guest").Document(id).DeleteAsync();
+		await db.Collection("account_guest").Document(id).DeleteAsync();
 	
 	public static async Task<UserResponse> GetUserAsync(string id)
 	{
-		var user = await db.Collection("users").Document(id).GetSnapshotAsync();
+		var user = await db.Collection("account").Document(id).GetSnapshotAsync();
 		return user.Exists ? user.ToDictionary().ToConvert<UserResponse>() : new UserResponse();
 	}
 	
 	public static async Task SetUserAsync(string id, UserResponse user) =>
-		await db.Collection("users").Document(id).SetAsync(user.ToDocument());
+		await db.Collection("account").Document(id).SetAsync(user.ToDocument());
 	
 	public static async Task DeleteUserAsync(string id) =>
-		await db.Collection("users").Document(id).DeleteAsync();
+		await db.Collection("account").Document(id).DeleteAsync();
 }
