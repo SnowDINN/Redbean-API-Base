@@ -54,11 +54,11 @@ public class AuthenticationController : ControllerBase
 					var userRecord = await FirebaseSetting.Authentication?.GetUserAsync(requestBody.id);
 					if (userRecord.ProviderData.Length > 0)
 					{
-						user.Social.Id = userRecord.Uid;
 						user.Social.Profile = userRecord.ProviderData[0].PhotoUrl;
 						user.Social.Platform = userRecord.ProviderData[0].ProviderId;
 					}
 					
+					user.Information.Id = userRecord.Uid;
 					user.Information.Nickname = userRecord.DisplayName;
 				}
 				catch
