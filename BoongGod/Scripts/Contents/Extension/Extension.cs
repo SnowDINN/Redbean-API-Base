@@ -26,10 +26,12 @@ public static class Extension
 	
 	public static ContentResult ToPublish<T>(this T value, int errorCode = 0) where T : IApiResponse
 	{
-		var response = ApiResponse.Default;
-		response.ErrorCode = errorCode;
-		response.Response = value;
-		
+		var response = new ApiResponse
+		{
+			ErrorCode = errorCode,
+			RawResponse = value
+		};
+
 		if (errorCode == 0)
 			return new ContentResult
 			{
@@ -37,7 +39,7 @@ public static class Extension
 				ContentType = "application/json"
 			};
 		
-		response.Response = default;
+		response.RawResponse = default;
 		return new ContentResult
 		{
 			Content = JsonConvert.SerializeObject(response),
@@ -48,9 +50,11 @@ public static class Extension
 	
 	public static ContentResult ToJsonPublish<T>(this T value, int errorCode = 0)
 	{
-		var response = ApiResponse.Default;
-		response.ErrorCode = errorCode;
-		response.Response = value;
+		var response = new ApiResponse
+		{
+			ErrorCode = errorCode,
+			RawResponse = value
+		};
 		
 		if (errorCode == 0)
 			return new ContentResult
@@ -59,7 +63,7 @@ public static class Extension
 				ContentType = "application/json"
 			};
 		
-		response.Response = default;
+		response.RawResponse = default;
 		return new ContentResult
 		{
 			Content = JsonConvert.SerializeObject(response),
@@ -69,9 +73,11 @@ public static class Extension
 
 	public static ContentResult ToPublishCode(this ControllerBase controllerBase, int errorCode = 0)
 	{
-		var response = ApiResponse.Default;
-		response.ErrorCode = errorCode;
-		response.Response = default;
+		var response = new ApiResponse
+		{
+			ErrorCode = errorCode,
+			RawResponse = default
+		};
 		
 		return new ContentResult
 		{
