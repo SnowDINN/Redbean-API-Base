@@ -32,7 +32,7 @@ public class RedisDatabase
 		if (string.IsNullOrEmpty(redis))
 		{
 			var user = await FirebaseDatabase.GetUserAsync(userId);
-			if (!string.IsNullOrEmpty(user.Information.Id))
+			if (user is not null)
 				await SetUserAsync(userId, user);
 		}
     		

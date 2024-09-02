@@ -34,12 +34,10 @@ public class AuthenticationController : ControllerBase
 		{
 			// 기존 사용자 탐색
 			var findGuestUser = await FirebaseDatabase.GetGuestUserAsync(requestBody.id);
-			if (string.IsNullOrEmpty(findGuestUser.Information.Id))
+			if (findGuestUser is null)
 			{
 				// 신규 사용자 데이터 저장
-				user.Information.Id = requestBody.id.Encryption();
-				user.Information.Nickname = "GuestUser";
-				user.Social.Platform = "Guest";
+				user.Information.Nickname = "Guest";
 			}
 			else
 				user = findGuestUser;
@@ -48,7 +46,7 @@ public class AuthenticationController : ControllerBase
 		{
 			// 기존 사용자 탐색
 			var findUser = await FirebaseDatabase.GetUserAsync(requestBody.id);
-			if (string.IsNullOrEmpty(findUser.Information.Id))
+			if (findUser is null)
 			{
 				// 신규 사용자 데이터 저장
 				try
@@ -56,11 +54,11 @@ public class AuthenticationController : ControllerBase
 					var userRecord = await FirebaseSetting.Authentication?.GetUserAsync(requestBody.id);
 					if (userRecord.ProviderData.Length > 0)
 					{
+						user.Social.Id = userRecord.Uid;
 						user.Social.Profile = userRecord.ProviderData[0].PhotoUrl;
 						user.Social.Platform = userRecord.ProviderData[0].ProviderId;
 					}
 					
-					user.Information.Id = userRecord.Uid.Encryption();
 					user.Information.Nickname = userRecord.DisplayName;
 				}
 				catch
@@ -78,6 +76,20 @@ public class AuthenticationController : ControllerBase
 
 	private async Task<ContentResult> ReturnUserResponse(AuthenticationRequest requestBody, UserResponse user, JwtToken token)
 	{
+		if (string.IsNullOrEmpty(requestBody.id))
+		{
+			var isDuplication = true;
+			while (isDuplication)
+			{
+				requestBody.id = $"{Guid.NewGuid()}".Replace("-", "");
+				var findGuestUser = await FirebaseDatabase.GetGuestUserAsync(requestBody.id);
+				if (findGuestUser is not null)
+					continue;
+
+				isDuplication = false;
+			}
+		}
+		
 		switch (requestBody.type)
 		{
 			case AuthenticationType.Guest:

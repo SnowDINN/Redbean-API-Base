@@ -22,7 +22,7 @@ public class FirebaseDatabase
 	public static async Task<UserResponse> GetGuestUserAsync(string id)
 	{
 		var user = await db.Collection("account_guest").Document(id).GetSnapshotAsync();
-		return user.Exists ? user.ToDictionary().ToConvert<UserResponse>() : new UserResponse();
+		return user.Exists ? user.ToDictionary().ToConvert<UserResponse>() : default;
 	}
 	
 	public static async Task SetGuestUserAsync(string id, UserResponse user) =>
@@ -34,7 +34,7 @@ public class FirebaseDatabase
 	public static async Task<UserResponse> GetUserAsync(string id)
 	{
 		var user = await db.Collection("account").Document(id).GetSnapshotAsync();
-		return user.Exists ? user.ToDictionary().ToConvert<UserResponse>() : new UserResponse();
+		return user.Exists ? user.ToDictionary().ToConvert<UserResponse>() : default;
 	}
 	
 	public static async Task SetUserAsync(string id, UserResponse user) =>
