@@ -37,6 +37,7 @@ public class AuthenticationController : ControllerBase
 			if (findGuestUser is null)
 			{
 				// 신규 사용자 데이터 저장
+				user.Information.Id = "";
 				user.Information.Nickname = "Guest";
 			}
 			else
@@ -76,7 +77,7 @@ public class AuthenticationController : ControllerBase
 
 	private async Task<ContentResult> ReturnUserResponse(AuthenticationRequest requestBody, UserResponse user, JwtToken token)
 	{
-		if (string.IsNullOrEmpty(requestBody.id))
+		if (string.IsNullOrEmpty(user.Information.Id))
 		{
 			var isDuplication = true;
 			while (isDuplication)
@@ -86,6 +87,7 @@ public class AuthenticationController : ControllerBase
 				if (findGuestUser is not null)
 					continue;
 
+				user.Information.Id = requestBody.id;
 				isDuplication = false;
 			}
 		}
