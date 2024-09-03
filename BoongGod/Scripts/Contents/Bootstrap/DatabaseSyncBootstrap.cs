@@ -11,12 +11,12 @@ public class DatabaseSyncBootstrap : IBootstrap
 
 	public Task Setup()
 	{
-		FirebaseDatabase.GetConfigDocument("app").Listen(async _ =>
+		FirebaseDatabase.GetConfigDocument(FirebaseKey.APP).Listen(async _ =>
 		{
 			await RedisDatabase.SetValueAsync(RedisKey.APP_CONFIG, _.ToDictionary());
 		});
 		
-		FirebaseDatabase.GetConfigDocument("table").Listen(async _ =>
+		FirebaseDatabase.GetConfigDocument(FirebaseKey.TABLE).Listen(async _ =>
 		{
 			var table = new Dictionary<string, string>();
 			var objects = FirebaseStorage.GetFiles("Table/");
