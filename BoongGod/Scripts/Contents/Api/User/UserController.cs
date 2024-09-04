@@ -14,11 +14,11 @@ namespace Redbean.Api.Controllers;
 [Route("[controller]/[action]")]
 public class UserController : ControllerBase
 {
-	[HttpPost, HttpAuthorize(ApiPermission.User)]
+	[HttpPost, HttpSchema(typeof(EmptyResponse)), HttpAuthorize(ApiPermission.User)]
 	public async Task<IActionResult> PostUserNickname([FromBody] StringRequest requestBody) => 
 		await PostUserNicknameAsync(requestBody.Value);
 
-	[HttpPost, HttpAuthorize(ApiPermission.User)]
+	[HttpPost, HttpSchema(typeof(EmptyResponse)), HttpAuthorize(ApiPermission.User)]
 	public async Task<IActionResult> PostUserWithdrawal() => 
 		await PostUserWithdrawalAsync();
 
