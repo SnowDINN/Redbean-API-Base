@@ -20,7 +20,7 @@ public class EditAccessController : ControllerBase
 	/// 테이블 구성 데이터
 	/// </summary>
 	[HttpGet, HttpSchema(typeof(TableAccessKeyResponse))]
-	public async Task<IActionResult> GetTableAccessKey() => 
+	public async Task<IActionResult> EditTableAccessKey() => 
 		(await RedisDatabase.GetValueAsync<TableAccessKeyResponse>(RedisKey.TABLE_CONFIG)).ToPublish();
 	
 	private Task<IActionResult> PostEditorAccessTokenAsync(string email)

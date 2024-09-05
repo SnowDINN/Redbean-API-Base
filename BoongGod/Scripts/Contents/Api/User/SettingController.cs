@@ -18,7 +18,7 @@ public class SettingController : ControllerBase
 	/// <summary>
 	/// 테이블 데이터
 	/// </summary>
-	[HttpGet, HttpSchema(typeof(TableSettingResponse)), HttpAuthorize(ApiPermission.User)]
+	[HttpGet, HttpSchema(typeof(TableSettingResponse))]
 	public async Task<IActionResult> GetTableSetting() =>
 		(await RedisDatabase.GetValueAsync<TableSettingResponse>(RedisKey.TABLE)).ToPublish();
 }
