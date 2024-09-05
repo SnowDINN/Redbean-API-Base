@@ -29,7 +29,7 @@ public class DatabaseSyncBootstrap : IBootstrap
 				table.Add(tableName, text);
 			}
 
-			await RedisDatabase.SetValueAsync(RedisKey.TABLE, new TableResponse { Table = table });
+			await RedisDatabase.SetValueAsync(RedisKey.TABLE, new TableSettingResponse { Table = table });
 			await RedisDatabase.SetValueAsync(RedisKey.TABLE_CONFIG, _.ToDictionary());
 		});
 

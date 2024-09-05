@@ -11,21 +11,14 @@ public class SettingController : ControllerBase
 	/// <summary>
 	/// 앱 구성 데이터
 	/// </summary>
-	[HttpGet, HttpSchema(typeof(AppConfigResponse))]
-	public async Task<IActionResult> GetAppConfig() =>
-		(await RedisDatabase.GetValueAsync<AppConfigResponse>(RedisKey.APP_CONFIG)).ToPublish();
-	
-	/// <summary>
-	/// 테이블 구성 데이터
-	/// </summary>
-	[HttpGet, HttpSchema(typeof(TableConfigResponse))]
-	public async Task<IActionResult> GetTableConfig() => 
-		(await RedisDatabase.GetValueAsync<TableConfigResponse>(RedisKey.TABLE_CONFIG)).ToPublish();
+	[HttpGet, HttpSchema(typeof(AppSettingResponse))]
+	public async Task<IActionResult> GetAppSetting() =>
+		(await RedisDatabase.GetValueAsync<AppSettingResponse>(RedisKey.APP_CONFIG)).ToPublish();
 	
 	/// <summary>
 	/// 테이블 데이터
 	/// </summary>
-	[HttpGet, HttpSchema(typeof(TableResponse)), HttpAuthorize(ApiPermission.User)]
-	public async Task<IActionResult> GetTable() =>
-		(await RedisDatabase.GetValueAsync<TableResponse>(RedisKey.TABLE)).ToPublish();
+	[HttpGet, HttpSchema(typeof(TableSettingResponse)), HttpAuthorize(ApiPermission.User)]
+	public async Task<IActionResult> GetTableSetting() =>
+		(await RedisDatabase.GetValueAsync<TableSettingResponse>(RedisKey.TABLE)).ToPublish();
 }

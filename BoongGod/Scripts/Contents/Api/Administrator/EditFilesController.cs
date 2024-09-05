@@ -28,7 +28,7 @@ public class EditFilesController : ControllerBase
 	private async Task<IActionResult> PostTablesAsync(string path, IEnumerable<RequestFile> files)
 	{
 		var tableUploadRequest = await PostFilesAsync(path, files);
-		var tableConfigResponse = await RedisDatabase.GetValueAsync<TableConfigResponse>(RedisKey.TABLE_CONFIG);
+		var tableConfigResponse = await RedisDatabase.GetValueAsync<TableAccessKeyResponse>(RedisKey.TABLE_CONFIG);
 		tableConfigResponse.Update.UpdateTime = $"{DateTime.UtcNow}";
 		
 		await FirebaseDatabase.SetTableSettingAsync(tableConfigResponse.ToDocument());

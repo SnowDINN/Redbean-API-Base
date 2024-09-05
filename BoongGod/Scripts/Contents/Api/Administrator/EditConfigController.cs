@@ -25,7 +25,7 @@ public class EditConfigController : ControllerBase
 	
 	private async Task<IActionResult> PostVersionAsync(MobileType type, string version)
 	{
-		var appConfigResponse = await RedisDatabase.GetValueAsync<AppConfigResponse>(RedisKey.APP_CONFIG);
+		var appConfigResponse = await RedisDatabase.GetValueAsync<AppSettingResponse>(RedisKey.APP_CONFIG);
 		
 		switch (type)
 		{
@@ -44,7 +44,7 @@ public class EditConfigController : ControllerBase
 
 	private async Task<IActionResult> PostAppMaintenanceAsync(string contents, DateTime startTime, DateTime endTime)
 	{
-		var appConfigResponse = await RedisDatabase.GetValueAsync<AppConfigResponse>(RedisKey.APP_CONFIG);
+		var appConfigResponse = await RedisDatabase.GetValueAsync<AppSettingResponse>(RedisKey.APP_CONFIG);
 		appConfigResponse.Maintenance.Contents = contents;
 		appConfigResponse.Maintenance.Time.StartTime = $"{startTime}";
 		appConfigResponse.Maintenance.Time.EndTime = $"{endTime}";

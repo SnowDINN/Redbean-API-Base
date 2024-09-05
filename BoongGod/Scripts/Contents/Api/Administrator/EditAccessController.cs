@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Redbean.Extension;
 using Redbean.JWT;
+using Redbean.Redis;
 
 namespace Redbean.Api.Controllers;
 
@@ -14,6 +15,13 @@ public class EditAccessController : ControllerBase
 	[HttpPost, HttpSchema(typeof(StringResponse))]
 	public async Task<IActionResult> EditAppAccessToken([FromBody] StringRequest requestBody) =>
 		await PostEditorAccessTokenAsync(requestBody.Value);
+	
+	/// <summary>
+	/// 테이블 구성 데이터
+	/// </summary>
+	[HttpGet, HttpSchema(typeof(TableAccessKeyResponse))]
+	public async Task<IActionResult> GetTableAccessKey() => 
+		(await RedisDatabase.GetValueAsync<TableAccessKeyResponse>(RedisKey.TABLE_CONFIG)).ToPublish();
 	
 	private Task<IActionResult> PostEditorAccessTokenAsync(string email)
 	{
