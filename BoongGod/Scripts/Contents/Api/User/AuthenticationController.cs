@@ -27,8 +27,7 @@ public class AuthenticationController : ControllerBase
 	private async Task<IActionResult> PostAccessTokenAndUserAsync(UserRequest requestBody)
 	{
 		var user = new UserResponse();
-		var token = JwtGenerator.GenerateUserToken(requestBody.id.Encryption());
-		
+
 		requestBody.id = requestBody.id.Decryption();
 		if (requestBody.type == AuthenticationType.Guest)
 		{
@@ -38,7 +37,9 @@ public class AuthenticationController : ControllerBase
 			{
 				// 신규 사용자 데이터 저장
 				user.Information.Id = "";
-				user.Information.Nickname = "Guest";
+				user.Information.Nickname = "User";
+
+				user.Social.Platform = $"{AuthenticationType.Guest}";
 			}
 			else
 				user = findGuestUser;
@@ -56,7 +57,12 @@ public class AuthenticationController : ControllerBase
 					if (userRecord.ProviderData.Length > 0)
 					{
 						user.Social.Profile = userRecord.ProviderData[0].PhotoUrl;
-						user.Social.Platform = userRecord.ProviderData[0].ProviderId;
+						user.Social.Platform = userRecord.ProviderData[0].ProviderId switch
+						{
+							var platform when platform.Contains("apple") => $"{AuthenticationType.Apple}",
+							var platform when platform.Contains("google") => $"{AuthenticationType.Google}",
+							_ => $"{AuthenticationType.Google}"
+						};
 					}
 					
 					user.Information.Id = userRecord.Uid;
@@ -72,10 +78,10 @@ public class AuthenticationController : ControllerBase
 		}
 
 		user.Log.LastConnected = $"{DateTime.UtcNow}";
-		return await ReturnUserResponse(requestBody, user, token);
+		return await ReturnUserResponse(requestBody, user);
 	}
 
-	private async Task<ContentResult> ReturnUserResponse(UserRequest requestBody, UserResponse user, JwtToken token)
+	private async Task<ContentResult> ReturnUserResponse(UserRequest requestBody, UserResponse user)
 	{
 		if (string.IsNullOrEmpty(user.Information.Id))
 		{
@@ -113,7 +119,7 @@ public class AuthenticationController : ControllerBase
 		return new Dictionary<string, object>
 		{
 			{"user", user},
-			{"token", token}
+			{"token", JwtGenerator.GenerateUserToken(user.Information.Id.Encryption())}
 		}.ToJsonPublish();
 	}
 

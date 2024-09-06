@@ -38,9 +38,14 @@ public class UserController : ControllerBase
 	{
 		var userId = this.GetUserId().Decryption();
 		await FirebaseDatabase.DeleteUserAsync(userId);
-		
-		if (requestBody.type > AuthenticationType.Guest)
+
+		if (requestBody.type == AuthenticationType.Guest)
+			await FirebaseDatabase.DeleteGuestUserAsync(userId);
+		else
+		{
 			await FirebaseSetting.Authentication?.DeleteUserAsync(userId);
+			await FirebaseDatabase.DeleteUserAsync(userId);
+		}
 
 		return this.ToPublishCode();
 	}
