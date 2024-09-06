@@ -14,7 +14,7 @@ public class AuthenticationController : ControllerBase
 	/// 사용자 로그인 및 토큰 발급
 	/// </summary>
 	[HttpPost, HttpSchema(typeof(UserAndTokenResponse))]
-	public async Task<IActionResult> PostAccessTokenAndUser([FromBody] AuthenticationRequest requestBody) => 
+	public async Task<IActionResult> PostAccessTokenAndUser([FromBody] UserRequest requestBody) => 
 		await PostAccessTokenAndUserAsync(requestBody);
 	
 	/// <summary>
@@ -24,7 +24,7 @@ public class AuthenticationController : ControllerBase
 	public async Task<IActionResult> PostAccessTokenRefresh([FromBody] StringRequest requestBody) => 
 		await PostRefreshAccessTokenAsync(requestBody.Value);
 	
-	private async Task<IActionResult> PostAccessTokenAndUserAsync(AuthenticationRequest requestBody)
+	private async Task<IActionResult> PostAccessTokenAndUserAsync(UserRequest requestBody)
 	{
 		var user = new UserResponse();
 		var token = JwtGenerator.GenerateUserToken(requestBody.id.Encryption());
@@ -75,7 +75,7 @@ public class AuthenticationController : ControllerBase
 		return await ReturnUserResponse(requestBody, user, token);
 	}
 
-	private async Task<ContentResult> ReturnUserResponse(AuthenticationRequest requestBody, UserResponse user, JwtToken token)
+	private async Task<ContentResult> ReturnUserResponse(UserRequest requestBody, UserResponse user, JwtToken token)
 	{
 		if (string.IsNullOrEmpty(user.Information.Id))
 		{

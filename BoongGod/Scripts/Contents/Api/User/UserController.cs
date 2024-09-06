@@ -19,25 +19,28 @@ public class UserController : ControllerBase
 		await PostUserNicknameAsync(requestBody.Value);
 
 	[HttpPost, HttpSchema(typeof(EmptyResponse)), HttpAuthorize(ApiPermission.User)]
-	public async Task<IActionResult> PostUserWithdrawal() => 
-		await PostUserWithdrawalAsync();
+	public async Task<IActionResult> PostUserWithdrawal([FromBody] UserWithdrawalRequest requestBody) => 
+		await PostUserWithdrawalAsync(requestBody);
 
 	private async Task<IActionResult> PostUserNicknameAsync(string nickname)
 	{
-		var userId = this.GetUserId().Decryption();
 		var user = await this.GetUser();
 		user.Information.Nickname = nickname;
-		await RedisDatabase.SetUserAsync(userId, user);
 		
+		var userId = this.GetUserId().Decryption();
+		await RedisDatabase.SetUserAsync(userId, user);
 		await FirebaseDatabase.SetUserAsync(userId, user);
+		
 		return this.ToPublishCode();
 	}
 
-	private async Task<IActionResult> PostUserWithdrawalAsync()
+	private async Task<IActionResult> PostUserWithdrawalAsync(UserWithdrawalRequest requestBody)
 	{
 		var userId = this.GetUserId().Decryption();
-		await FirebaseSetting.Authentication?.DeleteUserAsync(userId);
 		await FirebaseDatabase.DeleteUserAsync(userId);
+		
+		if (requestBody.type > AuthenticationType.Guest)
+			await FirebaseSetting.Authentication?.DeleteUserAsync(userId);
 
 		return this.ToPublishCode();
 	}
