@@ -1,3 +1,3 @@
 [submodule "RedbeanAPI/UnityBridge"]
-	path = RedbeanAPI/UnityBridge
+	path = RedbeanAPI/Scripts/UnityBridge
 	url = https://github.com/SnowDINN/Redbean-API-Unity-Bridge.git
