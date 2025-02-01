@@ -1,8 +1,8 @@
 {
   "Swagger":
   {
-    "OauthClientId": "517818090277-b4n17aclsf2ie6e2c06e6fqbqhh9d03u.apps.googleusercontent.com",
-    "OauthClientSecretId": "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"
+    "OauthClientId": "",
+    "OauthClientSecretId": ""
   },
   "GoogleCloud":
   {
